@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabletBot.Discord.Common
+namespace TabletBot.Common
 {
     public class LogMessage
     {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
+using TabletBot.Common;
 using TabletBot.Discord.Commands;
 
 namespace TabletBot.Discord
@@ -26,9 +27,15 @@ namespace TabletBot.Discord
         {
             if (!CommandsRegistered)
             {
+                await Log.WriteAsync("CommandSvc", "Registering commands...");
                 foreach (var module in Commands)
+                {
                     await CommandService.AddModuleAsync(module, Services);
+                    await Log.WriteAsync("CommandSvc", $"Registered module '{module.Name}'.");
+                }
                 CommandService.CommandExecuted += CommandExecuted;
+                CommandsRegistered = true;
+                await Log.WriteAsync("CommandSvc", "Successfully registered commands.");
             }
         }
 
@@ -36,8 +43,11 @@ namespace TabletBot.Discord
         {
             if (CommandsRegistered)
             {
-                var context = new CommandContext(Client, message as IUserMessage);
-                await CommandService.ExecuteAsync(context, 0, Services).ConfigureAwait(false);
+                if (message.Content.StartsWith("$"))
+                {
+                    var context = new CommandContext(DiscordClient, message as IUserMessage);
+                    await CommandService.ExecuteAsync(context, 1, Services).ConfigureAwait(false);
+                }
             }
         }
 

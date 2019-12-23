@@ -1,28 +1,17 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.CommandLine;
-using System.CommandLine.DragonFruit;
 using System.CommandLine.Invocation;
-using System.CommandLine.Rendering;
-using System.CommandLine.Rendering.Views;
-using System.Diagnostics;
-using System.IO;
-using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
+using TabletBot.Common;
 using TabletBot.Discord;
-using TabletBot.Discord.Common;
 
 namespace TabletBot
 {
-    class Program
+    partial class Program
     {
-        public static Bot DiscordBot { set; get; }
-        
         static void Main(string[] args)
         {
+            Log.Output += (sender, output) => Console.WriteLine(string.Format("{0}   {1}\t| {2}", output.Time.ToLongTimeString(), output.Group, output.Text));
             MainAsync(args).GetAwaiter().GetResult();
         }
 
@@ -30,32 +19,53 @@ namespace TabletBot
         {
             var root = new RootCommand("TabletBot")
             {
-                new Option<string>(new string[] { "-t", "--discord-token" }, "Sets the discord bot's token.")
+                new Option<string>(new string[] { "-t", "--discord-token" }, "Sets the bot's Discord API token.")
                 {
                     Argument = new Argument<string>("discordToken")
+                },
+                new Option<string>("--github-token", "Sets the bot's GitHub API token.")
+                {
+                    Argument = new Argument<string>("githubToken")
                 }
             };
-            root.Handler = CommandHandler.Create<string>((discordToken) => 
+
+            root.Handler = CommandHandler.Create<string, string>((discordToken, githubToken) => 
             {
                 if (discordToken != null)
                     Settings.Current.DiscordBotToken = discordToken;
-                
+                if (githubToken != null)
+                    Settings.Current.GitHubAPIToken = githubToken;
             });
-            
-            DiscordBot = new Bot(Settings.Current.DiscordBotToken);
 
-            while (DiscordBot.IsRunning)
+            await root.InvokeAsync(args);
+            
+            Bot.Current = new Bot();
+            await Bot.Current.Setup(Settings.Current);
+            await Task.Run(InitializeCommands);
+            
+            while (Bot.Current.IsRunning)
             {
+                await RunCommand(Console.ReadLine());
             }
         }
 
-        static async Task RunCommand(InvocationContext context, string args)
+        static async Task RunCommand(string args)
         {
-            var root = new Command("Bot Controls");
-            var sendMessage = new Command("send");
-            sendMessage.Handler = CommandHandler.Create<ulong, string>(DiscordBot.Send);
-            root.AddCommand(sendMessage);
-            await root.InvokeAsync(args, context.Console);
+            if (!string.IsNullOrWhiteSpace(args))
+            {
+                try
+                {
+                    BotCommands.Invoke(args);
+                }
+                catch (Exception ex)
+                {
+                    Log.Exception(ex);
+                }
+            }
+            else
+            {
+                await Log.WriteAsync("CommandError", "Invalid command.");
+            }
         }
     }
 }

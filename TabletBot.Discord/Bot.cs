@@ -2,24 +2,29 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using TabletBot.Common;
+using TabletBot.GitHub;
 
 namespace TabletBot.Discord
 {
     public partial class Bot
     {
-        private Bot()
+        public Bot()
         {
-            Client.Log += (msg) => Log.WriteAsync("Client", msg.Message);
-            Client.MessageReceived += MessageReceived;
-            Client.Ready += ClientReady;
+            DiscordClient.Log += (msg) => LogExtensions.WriteAsync(msg);
+            DiscordClient.MessageReceived += MessageReceived;
+            DiscordClient.Ready += ClientReady;
         }
 
-        public Bot(string token) : this()
+        public async Task Setup(Settings settings)
         {
-            Login(token).GetAwaiter().GetResult();
+            if (settings.DiscordBotToken != null)
+                await Login(settings.DiscordBotToken);
+            await RegisterCommands();
         }
 
-        public DiscordSocketClient Client { set; get; } = new DiscordSocketClient();
+        public static Bot Current { set; get; }
+        public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient();
 
         public bool IsRunning { set; get; } = true;
 
@@ -29,7 +34,8 @@ namespace TabletBot.Discord
         {
             if (token != null)
             {
-                await Client.LoginAsync(TokenType.Bot, token);
+                await DiscordClient.LoginAsync(TokenType.Bot, token);
+                await DiscordClient.StartAsync();
                 IsRunning = true;
             }
             else
@@ -40,13 +46,13 @@ namespace TabletBot.Discord
 
         public async Task Logout()
         {
-            await Client.LogoutAsync();
+            await DiscordClient.LogoutAsync();
             IsRunning = false;
         }
 
         public async Task Send(ulong channelId, string message)
         {
-            var channel = Client.GetChannel(channelId);
+            var channel = DiscordClient.GetChannel(channelId);
             if (channel is ITextChannel textChannel)
                 await textChannel.SendMessageAsync(message).ConfigureAwait(false);
             else
@@ -59,15 +65,13 @@ namespace TabletBot.Discord
 
         private async Task ClientReady()
         {
-            await Task.WhenAll(
-                Log.WriteAsync("Client", "Ready.")
-            ).ConfigureAwait(false);
+            await Task.WhenAll().ConfigureAwait(false);
         }
 
         private async Task MessageReceived(IMessage message)
         {
             await Task.WhenAll(
-                Log.WriteAsync(message),
+                LogExtensions.WriteAsync(message),
                 HandleCommand(message)
             ).ConfigureAwait(false);
         }

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TabletBot.Discord\TabletBot.Discord.csproj" />
+    <ProjectReference Include="..\TabletBot.Common\TabletBot.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
