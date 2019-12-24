@@ -14,7 +14,7 @@ namespace TabletBot.Discord.Commands
         private const string RepositoryOwner = "InfinityGhost";
         private const string RepositoryName = "OpenTabletDriver";
 
-        [Command("overview"), Alias("info")]
+        [Command("overview", RunMode = RunMode.Async), Alias("info")]
         public async Task GetRepositoryOverview()
         {
             var message = await ReplyAsync($"Getting overview for {RepositoryOwner}/{RepositoryName}...");
@@ -34,9 +34,11 @@ namespace TabletBot.Discord.Commands
             {
                 Title = $"{RepositoryOwner}/{RepositoryName}",
                 Timestamp = repo.PushedAt,
+                Url = repo.HtmlUrl,
                 ThumbnailUrl = Bot.Current.DiscordClient.CurrentUser.GetAvatarUrl(),
                 Footer = new EmbedFooterBuilder
                 {
+                    Text = $"Last pushed {repo.PushedAt}",
                     IconUrl = repo.Owner.AvatarUrl
                 }
             };
@@ -45,14 +47,15 @@ namespace TabletBot.Discord.Commands
             await message.Update(embed);
         }
 
-        [Command("getpr"), Alias("pr")]
+        [Command("getpr", RunMode = RunMode.Async), Alias("pr")]
         public async Task GetPullRequest([Remainder] int id)
         {
+            await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching pull request #{id}");
             var pr = await GitHub.PullRequest.Get(RepositoryOwner, RepositoryName, id);
             var embed = new EmbedBuilder
             {
-                Title = string.Format("{0} #{1}", pr.Title, pr.Id),
+                Title = string.Format("{0} #{1}", pr.Title, pr.Number),
                 Timestamp = pr.UpdatedAt,
                 Url = pr.HtmlUrl,
                 Footer = new EmbedFooterBuilder
@@ -61,18 +64,19 @@ namespace TabletBot.Discord.Commands
                     IconUrl = pr.User.AvatarUrl
                 }
             };
-            embed.AddField("Body", pr.Body);
+            embed.Description = pr.Body;
             await message.Update(embed);
         }
 
-        [Command("getissue"), Alias("issue")]
+        [Command("getissue", RunMode = RunMode.Async), Alias("issue")]
         public async Task GetIssue([Remainder] int id)
         {
+            await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching issue #{id}");
             var issue = await GitHub.Issue.Get(RepositoryOwner, RepositoryName, id);
             var embed = new EmbedBuilder
             {
-                Title = string.Format("{0} #{1}", issue.Title, issue.Id),
+                Title = string.Format("{0} #{1}", issue.Title, issue.Number ),
                 Timestamp = issue.CreatedAt,
                 Url = issue.HtmlUrl,
                 Footer = new EmbedFooterBuilder
@@ -81,7 +85,7 @@ namespace TabletBot.Discord.Commands
                     IconUrl = issue.User.AvatarUrl
                 }
             };
-            embed.AddField("Body", issue.Body);
+            embed.Description = issue.Body;
             await message.Update(embed);
         }
     }

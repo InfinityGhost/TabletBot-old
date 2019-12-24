@@ -17,7 +17,7 @@ namespace TabletBot
         {
             Log.Output += (sender, output) =>
             {
-                var line = string.Format("{0}   {1}\t| {2}", output.Time.ToLongTimeString(), output.Group, output.Text);
+                var line = string.Format("{0}  {1}\t| {2}", output.Time.ToLongTimeString(), output.Group, output.Text);
                 Output.WriteLine(line);
             };
             

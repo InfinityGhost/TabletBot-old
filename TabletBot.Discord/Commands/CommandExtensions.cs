@@ -22,5 +22,11 @@ namespace TabletBot.Discord.Commands
                 msg.Embed = null;
             });
         }
+
+        public static async Task DeleteDelayed(this IMessage message)
+        {
+            await Task.Delay(CommandModule.DeleteDelay);
+            await message.DeleteAsync();
+        }
     }
 }

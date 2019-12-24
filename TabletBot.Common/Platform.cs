@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace TabletBot
+namespace TabletBot.Common
 {
-    internal static class Platform
+    public static class Platform
     {
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);

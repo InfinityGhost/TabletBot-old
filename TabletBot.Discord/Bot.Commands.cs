@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Discord;
@@ -20,7 +21,8 @@ namespace TabletBot.Discord
         public Collection<Type> Commands { private set; get; } = new Collection<Type>()
         {
             typeof(ModerationCommands),
-            typeof(GitHubCommands)
+            typeof(GitHubCommands),
+            typeof(RoleCommands)
         };
 
         public async Task RegisterCommands()
@@ -43,7 +45,7 @@ namespace TabletBot.Discord
         {
             if (CommandsRegistered)
             {
-                if (message.Content.StartsWith("$"))
+                if (message.Content.StartsWith(Settings.Current.CommandPrefix))
                 {
                     var context = new CommandContext(DiscordClient, message as IUserMessage);
                     await CommandService.ExecuteAsync(context, 1, Services).ConfigureAwait(false);
@@ -59,15 +61,20 @@ namespace TabletBot.Discord
             }
             else
             {
+                IMessage msg;
                 switch (result.Error)
                 {
                     case CommandError.BadArgCount:
-                        await context.Channel.SendMessageAsync("Error: incorrect argument count.");
-                        return;
+                        msg = await context.Channel.SendMessageAsync("Error: incorrect argument count.");
+                        break;
                     default:
-                        await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
-                        return;
+                        msg = await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+                        break;
                 }
+                await Task.WhenAll(
+                    context.Message.DeleteDelayed(),
+                    msg.DeleteDelayed()
+                ).ConfigureAwait(false);
             }
         }
     }

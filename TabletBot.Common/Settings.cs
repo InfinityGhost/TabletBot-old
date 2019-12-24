@@ -17,10 +17,11 @@ namespace TabletBot.Common
 
         public ulong GuildID { set; get; } = MainGuild;
         public string DiscordBotToken { set; get; }
-        public string GitHubAPIToken { get; set; }
+        public string GitHubAPIToken { set; get; }
+        public string CommandPrefix { set; get; } = "!";
 
         [XmlArray("SelfRoles"), XmlArrayItem("Role")]
-        public Collection<ulong> SelfRoles { get; set; } = new Collection<ulong>();
+        public Collection<ulong> SelfRoles { set; get; } = new Collection<ulong>();
 
         public static readonly XmlSerializer Serializer = new XmlSerializer(typeof(Settings));
 
