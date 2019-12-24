@@ -4,30 +4,41 @@ using TabletBot.Discord;
 using TabletBot.Common;
 using TabletBot.GitHub;
 using System.Linq;
+using System.IO;
+using System.Diagnostics;
 
 namespace TabletBot
 {
     partial class Program
     {
-        static BotCommandDictionary BotCommands { set; get; }
-
-        static void InitializeCommands()
+        static BotCommandDictionary BotCommands { set; get; } = new BotCommandDictionary
         {
-            BotCommands = new BotCommandDictionary
+            new BotCommand("help", Help),
+            new BotCommand("stop", Stop),
+            new BotCommand("send", SendMessage),
+            new BotCommand("github-login", GitHubLogin),
+            new BotCommand("save-settings", SaveSettings),
+            new BotCommand("add-selfrole", AddSelfRole),
+            new BotCommand("remove-selfrole", RemoveSelfRole),
+            new BotCommand("list-settings", ListSettings),
+            new BotCommand("list-selfroles", ListSelfRoles)
+        };
+
+        static void Help(string args)
+        {
+            var names =
+                from command in BotCommands
+                select command.Name;
+            using (new DividerWrap())
             {
-                new BotCommand("help", Help),
-                new BotCommand("send", SendMessage),
-                new BotCommand("github-login", GitHubLogin),
-                new BotCommand("list-settings", ListSettings),
-                new BotCommand("add-selfrole", AddSelfRole),
-                new BotCommand("list-selfroles", ListSelfRoles)
-            };
+                foreach (var name in names)
+                    Output.WriteLine(name);
+            }
         }
 
-        static async void Help(string args)
+        static void Stop(string args)
         {
-            foreach (var cmd in BotCommands)
-                await Log.WriteAsync("Help", cmd.Name);
+            Bot.Current.IsRunning = false;
         }
 
         static async void SendMessage(string args)
@@ -36,18 +47,26 @@ namespace TabletBot
             await Bot.Current.Send(Convert.ToUInt64(tokens[0]), tokens[1]);
         }
 
-        static void GitHubLogin(string token)
+        static async void GitHubLogin(string token)
         {
             GitHubAPI.Current = new GitHubAPI("TabletBot", token);
             Settings.Current.GitHubAPIToken = token;
+            await Log.WriteAsync("GitHub", "Authenticated client.");
         }
 
         static async void ListSettings(string args)
         {
-            Console.WriteLine();
-            await foreach (var line in Settings.Current.ExportAsync())
-                Console.WriteLine(line);
-            Console.WriteLine();
+            using (new DividerWrap())
+            {
+                await foreach (var line in Settings.Current.ExportAsync())
+                Output.WriteLine(line);
+            }
+        }
+
+        static async void SaveSettings(string args)
+        {
+            Settings.Current.Write(Platform.SettingsFile);
+            await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
         }
 
         static async void AddSelfRole(string args)
@@ -87,19 +106,31 @@ namespace TabletBot
             }
         }
 
-        static async void ListSelfRoles(string args)
+        static void ListSelfRoles(string args)
         {
             if (Bot.Current != null)
             {
                 var selfRoles =
                     from role in Bot.Current.DiscordClient.GetGuild(Settings.Current.GuildID).Roles
                     where Settings.Current.SelfRoles.Contains(role.Id)
-                    select role.Name;
-                await Log.WriteAsync("SelfRoles", string.Join(", ", selfRoles));
+                    select (role.Name, role.Id);
+                using (new DividerWrap())
+                {
+                    foreach (var role in selfRoles)
+                        Output.WriteLine($"{role.Name} ({role.Id})");
+                }
             }
             else
             {
-                await Log.WriteAsync("SelfRoles", string.Join(", ", Settings.Current.SelfRoles));
+                var selfRoles =
+                    from role in Settings.Current.SelfRoles
+                    select role.ToString();
+                    
+                using (new DividerWrap())
+                {
+                    foreach (var role in selfRoles)
+                        Output.WriteLine(role);
+                }
             }
         }
     }

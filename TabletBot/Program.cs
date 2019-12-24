@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TabletBot.Common;
 using TabletBot.Discord;
@@ -9,14 +13,16 @@ namespace TabletBot
 {
     partial class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Log.Output += (sender, output) => Console.WriteLine(string.Format("{0}   {1}\t| {2}", output.Time.ToLongTimeString(), output.Group, output.Text));
-            MainAsync(args).GetAwaiter().GetResult();
-        }
+            Log.Output += (sender, output) =>
+            {
+                var line = string.Format("{0}   {1}\t| {2}", output.Time.ToLongTimeString(), output.Group, output.Text);
+                Output.WriteLine(line);
+            };
+            
+            Settings.Current = Platform.SettingsFile.Exists ? Settings.Read(Platform.SettingsFile) : new Settings();
 
-        static async Task MainAsync(string[] args)
-        {
             var root = new RootCommand("TabletBot")
             {
                 new Option<string>(new string[] { "-t", "--discord-token" }, "Sets the bot's Discord API token.")
@@ -41,12 +47,14 @@ namespace TabletBot
             
             Bot.Current = new Bot();
             await Bot.Current.Setup(Settings.Current);
-            await Task.Run(InitializeCommands);
+            await Task.Run(() => GitHubLogin(Settings.Current.GitHubAPIToken));
             
             while (Bot.Current.IsRunning)
             {
-                await RunCommand(Console.ReadLine());
+                var command = await System.Console.In.ReadLineAsync();
+                await RunCommand(command);
             }
+            await Bot.Current.Logout();
         }
 
         static async Task RunCommand(string args)

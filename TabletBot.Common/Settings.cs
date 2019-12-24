@@ -28,6 +28,8 @@ namespace TabletBot.Common
         {
             if (file.Exists)
                 file.Delete();
+            if (!file.Directory.Exists)
+                file.Directory.Create();
             using (var fs = file.OpenWrite())
                 Serializer.Serialize(fs, this);
         }
@@ -40,7 +42,6 @@ namespace TabletBot.Common
 
         public async IAsyncEnumerable<string> ExportAsync()
         {
-            
             using (var ds = new MemoryStream())
             using (var sr = new StreamReader(ds))
             {

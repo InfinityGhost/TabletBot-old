@@ -7,12 +7,20 @@ namespace TabletBot.Discord.Commands
     {
         public static async Task Update(this IUserMessage message, EmbedBuilder embed)
         {
-            await message.ModifyAsync((msg) => msg.Embed = embed.Build());
+            await message.ModifyAsync((msg) =>
+            {
+                msg.Content = null;
+                msg.Embed = embed.Build();
+            });
         }
 
         public static async Task Update(this IUserMessage message, string text)
         {
-            await message.ModifyAsync((msg) => msg.Content = text);
+            await message.ModifyAsync((msg) =>
+            {
+                msg.Content = text;
+                msg.Embed = null;
+            });
         }
     }
 }
