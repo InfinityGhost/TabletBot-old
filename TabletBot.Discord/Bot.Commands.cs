@@ -22,7 +22,8 @@ namespace TabletBot.Discord
         {
             typeof(ModerationCommands),
             typeof(GitHubCommands),
-            typeof(RoleCommands)
+            typeof(RoleCommands),
+            typeof(UserCommands)
         };
 
         public async Task RegisterCommands()
