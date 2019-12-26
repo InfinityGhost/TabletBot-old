@@ -17,7 +17,7 @@ namespace TabletBot.Discord.Commands
         private const string RepositoryOwner = "InfinityGhost";
         private const string RepositoryName = "OpenTabletDriver";
         private static readonly Regex ArtifactRegex = new Regex("<.+?href=\"/InfinityGhost/OpenTabletDriver/suites/(?<Suite>.+?)/artifacts/(?<Artifact>.+?)\">(?<Name>.+?)</.+?>");
-        private static readonly Regex CommitRegex = new Regex("href=\".+?commit/(?<SHA>.+?)\"");
+        private static readonly Regex CommitRegex = new Regex("href=\".+?commit/(?<SHA>.+?)/.+?/.+?\"");
 
         [Command("overview", RunMode = RunMode.Async), Alias("info")]
         public async Task GetRepositoryOverview()
