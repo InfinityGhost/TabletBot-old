@@ -13,7 +13,7 @@ namespace TabletBot.Discord.Commands
             return Settings.Current.SelfRoles.Contains(role.Id);
         }
 
-        [Command("addrole", RunMode = RunMode.Async), Summary("Adds a self-manageable role to yourself.")]
+        [Command("addrole", RunMode = RunMode.Async), Name("Add Role"), Summary("Adds a self-manageable role to yourself.")]
         public async Task AddRole([Remainder] IRole role)
         {
             await Context.Message.DeleteAsync();
@@ -30,7 +30,7 @@ namespace TabletBot.Discord.Commands
             }
         }
 
-        [Command("removerole", RunMode = RunMode.Async), Summary("Removes a self-manageable role from yourself.")]
+        [Command("removerole", RunMode = RunMode.Async), Name("Remove Role"), Summary("Removes a self-manageable role from yourself.")]
         public async Task RemoveRole([Remainder] IRole role)
         {
             await Context.Message.DeleteAsync();
@@ -47,7 +47,7 @@ namespace TabletBot.Discord.Commands
             }
         }
 
-        [Command("listroles", RunMode = RunMode.Async), Summary("Lists all self-manageable roles.")]
+        [Command("listroles", RunMode = RunMode.Async), Name("List Roles"), Summary("Lists all self-manageable roles.")]
         public async Task ListRoles()
         {
             await Context.Message.DeleteAsync();

@@ -6,7 +6,7 @@ namespace TabletBot.Discord.Commands
 {
     public class UserCommands : CommandModule
     {
-        [Command("tablet"), Summary("Appends your tablet's name to the end of your username.")]
+        [Command("tablet", RunMode = RunMode.Async), Name("Tablet"), Summary("Appends your tablet's name to the end of your username.")]
         public async Task SetTablet([Remainder]string tablet)
         {
             await Context.Message.DeleteAsync();

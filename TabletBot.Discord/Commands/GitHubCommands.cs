@@ -19,7 +19,7 @@ namespace TabletBot.Discord.Commands
         private static readonly Regex ArtifactRegex = new Regex("<.+?href=\"/InfinityGhost/OpenTabletDriver/suites/(?<Suite>.+?)/artifacts/(?<Artifact>.+?)\">(?<Name>.+?)</.+?>");
         private static readonly Regex CommitRegex = new Regex("href=\".+?commit/(?<SHA>.+?)/.+?/.+?\"");
 
-        [Command("overview", RunMode = RunMode.Async), Alias("info")]
+        [Command("overview", RunMode = RunMode.Async), Name("Overview"), Alias("info"), Summary("Shows an overview of the repository.")]
         public async Task GetRepositoryOverview()
         {
             var message = await ReplyAsync($"Getting overview for {RepositoryOwner}/{RepositoryName}...");
@@ -52,7 +52,7 @@ namespace TabletBot.Discord.Commands
             await message.Update(embed);
         }
 
-        [Command("getpr", RunMode = RunMode.Async), Alias("pr")]
+        [Command("getpr", RunMode = RunMode.Async), Name("Get Pull Request"), Alias("pr"), Summary("Fetches pull request information.")]
         public async Task GetPullRequest([Remainder] int id)
         {
             await Context.Message.DeleteAsync();
@@ -73,7 +73,7 @@ namespace TabletBot.Discord.Commands
             await message.Update(embed);
         }
 
-        [Command("getissue", RunMode = RunMode.Async), Alias("issue")]
+        [Command("getissue", RunMode = RunMode.Async), Name("Get Issue"), Alias("issue"), Summary("Fetches issue information.")]
         public async Task GetIssue([Remainder] int id)
         {
             await Context.Message.DeleteAsync();
@@ -94,7 +94,7 @@ namespace TabletBot.Discord.Commands
             await message.Update(embed);
         }
 
-        [Command("getartifacts", RunMode = RunMode.Async), Alias("artifacts", "artifact")]
+        [Command("getartifacts", RunMode = RunMode.Async), Name("Get Artifacts"), Alias("artifacts", "artifact"), Summary("Returns all artifacts for a workflow from its URL.")]
         public async Task GetArtifacts([Remainder] string url)
         {
             await Context.Message.DeleteAsync();

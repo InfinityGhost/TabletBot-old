@@ -1,10 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
+using TabletBot.Common;
 
 namespace TabletBot.Discord.Commands
 {
     internal static class CommandExtensions
     {
+
         public static async Task Update(this IUserMessage message, EmbedBuilder embed)
         {
             await message.ModifyAsync((msg) =>
@@ -27,6 +34,28 @@ namespace TabletBot.Discord.Commands
         {
             await Task.Delay(CommandModule.DeleteDelay);
             await message.DeleteAsync();
+        }
+
+        public static void EmbedParameters(this CommandInfo command, ref EmbedBuilder embed)
+        {
+            var field = new EmbedFieldBuilder
+            {
+                Name = string.Format("__{0}__", command.Name)
+            };
+           
+            if (command.Summary != null)
+                field.Value += command.Summary + Environment.NewLine;
+            
+            IEnumerable<string> parameters = 
+                from parameter in command.Parameters
+                select string.Format((parameter.IsOptional ? "[{0}]" : "<{0}>"), parameter.Name);
+            
+            field.Value += string.Format("**Syntax**: `{0}{1}{2}`", 
+                Settings.Current.CommandPrefix, 
+                command.Aliases[0], 
+                (' ' + string.Join(" ", parameters)).TrimEnd());
+                
+            embed.AddField(field);
         }
     }
 }

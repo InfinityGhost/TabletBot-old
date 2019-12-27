@@ -8,7 +8,7 @@ namespace TabletBot.Discord.Commands
 {
     public class ModerationCommands : ModuleBase
     {
-        [Command("delete", RunMode = RunMode.Async), Alias("del"), RequireUserPermission(GuildPermission.ManageMessages)]
+        [Command("delete", RunMode = RunMode.Async), Name("Delete"), Alias("del"), RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task DeleteMessage(int count = 1)
         {
             await Context.Message.DeleteAsync();
@@ -16,7 +16,7 @@ namespace TabletBot.Discord.Commands
             await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages);
         }
 
-        [Command("force-save", RunMode = RunMode.Async), RequireOwner]
+        [Command("force-save", RunMode = RunMode.Async), Name("Force Save"), RequireOwner]
         public async Task ForceSaveSettings()
         {
             await Context.Message.DeleteAsync();
@@ -24,7 +24,7 @@ namespace TabletBot.Discord.Commands
             await Log.WriteAsync("Settings", $"Owner force-saved the configuration to {Platform.SettingsFile.FullName}");
         }
 
-        [Command("kill-bot", RunMode = RunMode.Async), RequireOwner]
+        [Command("kill-bot", RunMode = RunMode.Async), Name("Kill Bot"), RequireOwner]
         public async Task ForceKillBot()
         {
             await Context.Message.DeleteAsync();
