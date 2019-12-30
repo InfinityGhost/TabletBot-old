@@ -31,5 +31,14 @@ namespace TabletBot.Discord.Commands
             await Bot.Current.Logout();
             Environment.Exit(0x0);
         }
+
+        [Command("set-prefix", RunMode = RunMode.Async), Name("Set prefix"), RequireOwner]
+        public async Task SetPrefix([Remainder] string prefix)
+        {
+            await Context.Message.DeleteAsync();
+            Settings.Current.CommandPrefix = prefix;
+            var message = await ReplyAsync(string.Format("Set the command prefix to `{0}`.", Settings.Current.CommandPrefix));
+            await message.DeleteDelayed();
+        }
     }
 }

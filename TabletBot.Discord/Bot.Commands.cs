@@ -73,10 +73,7 @@ namespace TabletBot.Discord
                         msg = await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
                         break;
                 }
-                await Task.WhenAll(
-                    context.Message.DeleteDelayed(),
-                    msg.DeleteDelayed()
-                ).ConfigureAwait(false);
+                DiscordExtensions.DeleteAllDelayed(context.Message, msg);
             }
         }
     }

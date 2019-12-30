@@ -13,7 +13,9 @@
             "program": "${workspaceFolder}/TabletBot/bin/Debug/netcoreapp3.0/TabletBot.dll",
             "args": [
                 "--discord-token",
-                "NjU5NjA1MTY4NTMwMTI4ODk2.XgQvPg.tdwVawDtun5qkatuCWiixZVfFF4"
+                "NjU5NjA1MTY4NTMwMTI4ODk2.XgQvPg.tdwVawDtun5qkatuCWiixZVfFF4",
+                "--github-token",
+                "fe3396a0f0cd0202cba374467df8aea804095f10"
             ],
             "cwd": "${workspaceFolder}/TabletBot",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

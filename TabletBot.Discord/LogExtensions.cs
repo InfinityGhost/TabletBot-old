@@ -1,11 +1,11 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using TabletBot.Common;
 using LogMessage = Discord.LogMessage;
 
 namespace TabletBot.Discord
 {
-    public class LogExtensions
+    public static class LogExtensions
     {
         public static async Task WriteAsync(IMessage message)
         {
