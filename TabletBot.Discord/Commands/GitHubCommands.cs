@@ -59,7 +59,7 @@ namespace TabletBot.Discord.Commands
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching pull request #{id}");
             var pr = await GitHub.PullRequest.Get(RepositoryOwner, RepositoryName, id);
-            var embed = GitHubEmbeds.GetEmbed(pr);
+            var embed = GitHubEmbeds.GetPullRequestEmbed(pr);
             await message.Update(embed);
         }
 
@@ -69,7 +69,7 @@ namespace TabletBot.Discord.Commands
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching issue #{id}");
             var issue = await GitHub.Issue.Get(RepositoryOwner, RepositoryName, id);
-            var embed = GitHubEmbeds.GetEmbed(issue);
+            var embed = GitHubEmbeds.GetIssueEmbed(issue);
             await message.Update(embed);
         }
 

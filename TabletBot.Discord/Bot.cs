@@ -88,9 +88,11 @@ namespace TabletBot.Discord
                 foreach (int issueRef in refs)
                 {
                     var issues = await GitHubAPI.Current.Issue.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
-                    if (issues.FirstOrDefault(i => i.Id == issueRef) is Issue issue)
+                    var prs = await GitHubAPI.Current.PullRequest.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
+                    if (issues.FirstOrDefault(i => i.Number == issueRef) is Issue issue)
                     {
-                        var embed = issue.PullRequest == null ? GitHubEmbeds.GetEmbed(issue) : GitHubEmbeds.GetEmbed(issue.PullRequest);
+                        var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);
+                        var embed = pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
                         await message.Channel.SendMessageAsync(embed: embed.Build());
                     }
                 }

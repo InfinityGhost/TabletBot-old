@@ -10,10 +10,11 @@ namespace TabletBot.GitHub
     {
         public static bool TryGetIssueRefNumbers(string message, out IEnumerable<int> refNums)
         {
-            if (IssueRefRegex.Match(message) is Match match)
+            var matches = IssueRefRegex.Matches(message);
+            if (matches.Count > 0)
             {
-                refNums = from grp in match.Groups as IEnumerable<Group>
-                    select int.Parse(grp.Value);
+                refNums = from match in matches as IEnumerable<Match>
+                    select int.Parse(match.Groups[1].Value);
                 return true;
             }
             else

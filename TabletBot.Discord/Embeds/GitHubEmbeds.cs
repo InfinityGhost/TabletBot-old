@@ -5,7 +5,7 @@ namespace TabletBot.Discord.Embeds
 {
     public static class GitHubEmbeds
     {
-        public static EmbedBuilder GetEmbed(Issue issue)
+        public static EmbedBuilder GetIssueEmbed(Issue issue)
         {
             return new EmbedBuilder
             {
@@ -21,7 +21,7 @@ namespace TabletBot.Discord.Embeds
             };
         }
 
-        public static EmbedBuilder GetEmbed(PullRequest pr)
+        public static EmbedBuilder GetPullRequestEmbed(PullRequest pr)
         {
             return new EmbedBuilder
             {
@@ -30,10 +30,10 @@ namespace TabletBot.Discord.Embeds
                 Url = pr.HtmlUrl,
                 Footer = new EmbedFooterBuilder
                 {
-                    Text = string.Format("{0} opened this pull request on {1}", pr.User.Login, pr.CreatedAt),
+                    Text = string.Format("{0} opened this pull request on {1}", pr.User?.Login, pr.CreatedAt),
                     IconUrl = pr.User.AvatarUrl
                 },
-                Description = pr.Body
+                Description = pr.Body ?? string.Empty
             };
         }
     }
