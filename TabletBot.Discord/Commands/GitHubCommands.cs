@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Octokit;
+using TabletBot.Discord.Embeds;
 using TabletBot.GitHub;
 
 namespace TabletBot.Discord.Commands
@@ -58,18 +59,7 @@ namespace TabletBot.Discord.Commands
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching pull request #{id}");
             var pr = await GitHub.PullRequest.Get(RepositoryOwner, RepositoryName, id);
-            var embed = new EmbedBuilder
-            {
-                Title = string.Format("{0} #{1}", pr.Title, pr.Number),
-                Timestamp = pr.UpdatedAt,
-                Url = pr.HtmlUrl,
-                Footer = new EmbedFooterBuilder
-                {
-                    Text = string.Format("{0} opened this pull request on {1}", pr.User.Login, pr.CreatedAt),
-                    IconUrl = pr.User.AvatarUrl
-                }
-            };
-            embed.Description = pr.Body;
+            var embed = GitHubEmbeds.GetPullRequestEmbed(pr);
             await message.Update(embed);
         }
 
@@ -79,18 +69,7 @@ namespace TabletBot.Discord.Commands
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching issue #{id}");
             var issue = await GitHub.Issue.Get(RepositoryOwner, RepositoryName, id);
-            var embed = new EmbedBuilder
-            {
-                Title = string.Format("{0} #{1}", issue.Title, issue.Number ),
-                Timestamp = issue.CreatedAt,
-                Url = issue.HtmlUrl,
-                Footer = new EmbedFooterBuilder
-                {
-                    Text = string.Format("{0} opened this issue on {1}", issue.User.Login, issue.CreatedAt),
-                    IconUrl = issue.User.AvatarUrl
-                }
-            };
-            embed.Description = issue.Body;
+            var embed = GitHubEmbeds.GetIssueEmbed(issue);
             await message.Update(embed);
         }
 
