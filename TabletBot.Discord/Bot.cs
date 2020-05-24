@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Octokit;
 using TabletBot.Common;
+using TabletBot.Discord.Embeds;
 using TabletBot.GitHub;
 
 namespace TabletBot.Discord
@@ -13,6 +17,7 @@ namespace TabletBot.Discord
         {
             DiscordClient.Log += (msg) => LogExtensions.WriteAsync(msg);
             DiscordClient.MessageReceived += MessageReceived;
+            DiscordClient.MessageReceived += CheckForIssueRef;
             DiscordClient.Ready += ClientReady;
         }
 
@@ -74,6 +79,22 @@ namespace TabletBot.Discord
                 LogExtensions.WriteAsync(message),
                 HandleCommand(message)
             ).ConfigureAwait(false);
+        }
+
+        private async Task CheckForIssueRef(IMessage message)
+        {
+            if (GitHubTools.TryGetIssueRefNumbers(message.Content, out var refs))
+            {
+                foreach (int issueRef in refs)
+                {
+                    var issues = await GitHubAPI.Current.Issue.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
+                    if (issues.FirstOrDefault(i => i.Id == issueRef) is Issue issue)
+                    {
+                        var embed = issue.PullRequest == null ? GitHubEmbeds.GetEmbed(issue) : GitHubEmbeds.GetEmbed(issue.PullRequest);
+                        await message.Channel.SendMessageAsync(embed: embed.Build());
+                    }
+                }
+            }
         }
 
         #endregion
