@@ -32,15 +32,20 @@ namespace TabletBot
                 new Option<string>("--github-token", "Sets the bot's GitHub API token.")
                 {
                     Argument = new Argument<string>("githubToken")
+                },
+                new Option<bool>("--unit", "Runs the bot as a unit." )
+                {
+                    Argument = new Argument<bool>("unit")
                 }
             };
 
-            root.Handler = CommandHandler.Create<string, string>((discordToken, githubToken) => 
+            root.Handler = CommandHandler.Create<string, string, bool>((discordToken, githubToken, unit) => 
             {
                 if (discordToken != null)
                     Settings.Current.DiscordBotToken = discordToken;
                 if (githubToken != null)
                     Settings.Current.GitHubAPIToken = githubToken;
+                runAsUnit = unit;
             });
 
             await root.InvokeAsync(args);
@@ -51,11 +56,20 @@ namespace TabletBot
             
             while (Bot.Current.IsRunning)
             {
-                var command = await System.Console.In.ReadLineAsync();
-                await RunCommand(command);
+                if (runAsUnit)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                }
+                else
+                {
+                    var command = await System.Console.In.ReadLineAsync();
+                    await RunCommand(command);
+                }
             }
             await Bot.Current.Logout();
         }
+
+        static bool runAsUnit;
 
         static async Task RunCommand(string args)
         {
