@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Octokit;
+using TabletBot.Common;
 using TabletBot.Discord.Embeds;
 using TabletBot.GitHub;
 
@@ -17,8 +18,6 @@ namespace TabletBot.Discord.Commands
         private GitHubAPI GitHub => TabletBot.GitHub.GitHubAPI.Current;
         private const string RepositoryOwner = "InfinityGhost";
         private const string RepositoryName = "OpenTabletDriver";
-        private static readonly Regex ArtifactRegex = new Regex("<.+?href=\"/InfinityGhost/OpenTabletDriver/suites/(?<Suite>.+?)/artifacts/(?<Artifact>.+?)\">(?<Name>.+?)</.+?>");
-        private static readonly Regex CommitRegex = new Regex("href=\".+?commit/(?<SHA>.+?)/.+?/.+?\"");
 
         [Command("overview", RunMode = RunMode.Async), Name("Overview"), Alias("info"), Summary("Shows an overview of the repository.")]
         public async Task GetRepositoryOverview()
@@ -79,30 +78,20 @@ namespace TabletBot.Discord.Commands
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync("Fetching artifacts...");
 
-            string html;
-            using (var client = new HttpClient())
-                html = await client.GetStringAsync(url);
-
-            IEnumerable<Match> artifacts = await Task<MatchCollection>.Run(() => ArtifactRegex.Matches(html));
-            Match commitMatch = await Task<Match>.Run(() => CommitRegex.Match(html));
-            string sha = commitMatch.Groups["SHA"].Value;
-            string hash = string.Concat(sha.Take(7));
-            var commit = await GitHub.Git.Commit.Get(RepositoryOwner, RepositoryName, sha);
-            var title = commit.Message.Split(Environment.NewLine).First();
+            var artifacts = await Artifact.GetArtifactsForRun(RepositoryOwner, RepositoryName, url);
             
             var embed = new EmbedBuilder
             {
-                Title = string.Format("{0} ({1})", title, hash),
+                Title = "Artifacts",
                 Url = url,
                 Color = Color.Green
             };
 
             foreach (var artifact in artifacts)
             {
-                var suite = Convert.ToInt32(artifact.Groups["Suite"].Value);
-                var id = Convert.ToInt32(artifact.Groups["Artifact"].Value);
-                var name = artifact.Groups["Name"].Value;
-                embed.AddField(name, string.Format("https://github.com/InfinityGhost/OpenTabletDriver/suites/{0}/artifacts/{1}", suite, id));
+                var token = GitHub.Credentials.GetToken();
+                var download = await artifact.GetDownloadRedirect(token);
+                embed.AddField(artifact.Name, download);
             }
 
             await message.Update(embed);
