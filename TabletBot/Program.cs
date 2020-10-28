@@ -38,8 +38,7 @@ namespace TabletBot
             {
                 new Option<string>(new string[] { "-t", "--discord-token" }, "Sets the bot's Discord API token.")
                 {
-                    Argument = new Argument<string>("discordToken"),
-                    Required = true
+                    Argument = new Argument<string>("discordToken")
                 },
                 new Option<string>(new string[] { "-g", "--github-token" }, "Sets the bot's GitHub API token.")
                 {
