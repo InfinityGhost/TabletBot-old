@@ -70,7 +70,7 @@ namespace TabletBot
             {
                 if (runAsUnit)
                 {
-                    await Task.Delay(TimeSpan.MaxValue);
+                    await Task.Delay(-1);
                 }
                 else
                 {
