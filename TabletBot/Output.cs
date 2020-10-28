@@ -29,5 +29,17 @@ namespace TabletBot
         {
             await System.Console.Out.WriteAsync('>');
         }
+
+        public static string SetLength(string str, int length)
+        {
+            if (str.Length == length)
+                return str;
+            else if (str.Length < length)
+                return $"{str}{string.Concat(Enumerable.Repeat(" ", length - str.Length))}";
+            else if (str.Length >= length)
+                return str.Substring(0, length);
+            else
+                return null;
+        }
     }
 }

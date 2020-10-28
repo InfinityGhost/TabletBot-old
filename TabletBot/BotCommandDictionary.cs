@@ -42,7 +42,7 @@ namespace TabletBot
             if (this[name] is BotCommand cmd)
                 cmd.Invoke(args);
             else
-                Log.Write("Error", "Invalid command.");
+                Log.Write("Error", "Invalid command.", LogLevel.Error);
         }
 
         public void Add(BotCommand command)

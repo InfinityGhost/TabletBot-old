@@ -17,7 +17,18 @@ namespace TabletBot
         {
             Log.Output += (sender, output) =>
             {
-                var line = string.Format("{0}  {1}\t| {2}", output.Time.ToLongTimeString(), output.Group, output.Text);
+                #if !DEBUG
+                if (output.Level <= LogLevel.Message)
+                    return;
+                #endif
+                
+                var line = string.Format(
+                    "{0} {1} {2} | {3}",
+                    output.Time.ToLongTimeString(),
+                    Output.SetLength($"{output.Level}", 8),
+                    Output.SetLength(output.Group, 10),
+                    output.Text
+                );
                 Output.WriteLine(line);
             };
             
@@ -27,13 +38,14 @@ namespace TabletBot
             {
                 new Option<string>(new string[] { "-t", "--discord-token" }, "Sets the bot's Discord API token.")
                 {
-                    Argument = new Argument<string>("discordToken")
+                    Argument = new Argument<string>("discordToken"),
+                    Required = true
                 },
-                new Option<string>("--github-token", "Sets the bot's GitHub API token.")
+                new Option<string>(new string[] { "-g", "--github-token" }, "Sets the bot's GitHub API token.")
                 {
                     Argument = new Argument<string>("githubToken")
                 },
-                new Option<bool>("--unit", "Runs the bot as a unit." )
+                new Option<bool>(new string[] { "-u", "--unit" }, "Runs the bot as a unit." )
                 {
                     Argument = new Argument<bool>("unit")
                 }
@@ -48,7 +60,8 @@ namespace TabletBot
                 runAsUnit = unit;
             });
 
-            await root.InvokeAsync(args);
+            if (await root.InvokeAsync(args) != 0)
+                return;
             
             Bot.Current = new Bot();
             await Bot.Current.Setup(Settings.Current);
@@ -58,7 +71,7 @@ namespace TabletBot
             {
                 if (runAsUnit)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    await Task.Delay(TimeSpan.MaxValue);
                 }
                 else
                 {
@@ -86,7 +99,7 @@ namespace TabletBot
             }
             else
             {
-                await Log.WriteAsync("CommandError", "Invalid command.");
+                await Log.WriteAsync("CommandError", "Invalid command.", LogLevel.Error);
             }
         }
     }

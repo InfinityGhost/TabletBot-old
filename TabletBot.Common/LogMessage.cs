@@ -7,11 +7,13 @@ namespace TabletBot.Common
         public readonly string Group;
         public readonly string Text;
         public readonly DateTime Time = DateTime.Now;
+        public readonly LogLevel Level;
 
-        public LogMessage(string group, string text)
+        public LogMessage(string group, string text, LogLevel level)
         {
-            Group = group;
-            Text = text;
+            this.Group = group;
+            this.Text = text;
+            this.Level = level;
         }
     }
 }

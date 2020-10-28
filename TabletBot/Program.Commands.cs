@@ -51,7 +51,7 @@ namespace TabletBot
         {
             GitHubAPI.Current = new GitHubAPI("TabletBot", token);
             Settings.Current.GitHubAPIToken = token;
-            await Log.WriteAsync("GitHub", "Authenticated client.");
+            await Log.WriteAsync("GitHub", "Authenticated client.", LogLevel.Info);
         }
 
         static async void ListSettings(string args)
@@ -66,7 +66,7 @@ namespace TabletBot
         static async void SaveSettings(string args)
         {
             Settings.Current.Write(Platform.SettingsFile);
-            await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
+            await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.", LogLevel.Info);
         }
 
         static async void AddSelfRole(string args)
@@ -78,14 +78,14 @@ namespace TabletBot
                 if (!Settings.Current.SelfRoles.Contains(roleId))
                 {
                     Settings.Current.SelfRoles.Add(roleId);
-                    await Log.WriteAsync("Settings", $"Added role {role} to self roles.");
+                    await Log.WriteAsync("Settings", $"Added role {role} to self roles.", LogLevel.Info);
                 }
                 else
-                    await Log.WriteAsync("Settings", $"Failed to add role {role} to self roles.");
+                    await Log.WriteAsync("Settings", $"Failed to add role {role} to self roles.", LogLevel.Error);
             }
             else
             {
-                await Log.WriteAsync("Settings", $"Role '{args}' does not exist.");
+                await Log.WriteAsync("Settings", $"Role '{args}' does not exist.", LogLevel.Error);
             }
         }
 
@@ -96,13 +96,13 @@ namespace TabletBot
                 var role = name != null ? $"'{name}' ({roleId})" : $"{roleId}";
                 
                 if (Settings.Current.SelfRoles.Remove(roleId))
-                    await Log.WriteAsync("Settings", $"Removed role {role} from self roles.");
+                    await Log.WriteAsync("Settings", $"Removed role {role} from self roles.", LogLevel.Info);
                 else
-                    await Log.WriteAsync("Settings", $"Failed to remove role {role} from self roles.");
+                    await Log.WriteAsync("Settings", $"Failed to remove role {role} from self roles.", LogLevel.Error);
             }
             else
             {
-                await Log.WriteAsync("Settings", $"Role '{args}' does not exist.");
+                await Log.WriteAsync("Settings", $"Role '{args}' does not exist.", LogLevel.Error);
             }
         }
 

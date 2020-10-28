@@ -15,17 +15,27 @@ namespace TabletBot.Discord
                 message.Channel.Name,
                 message.Author.Username,
                 message.Author.Discriminator
-            ));
+            ), LogLevel.Message);
         }
 
         public static async Task WriteAsync(LogMessage message)
         {
+            var logLevel = message.Severity switch
+            {
+                LogSeverity.Debug    => LogLevel.Debug,
+                LogSeverity.Info     => LogLevel.Info,
+                LogSeverity.Verbose  => LogLevel.Debug,
+                LogSeverity.Warning  => LogLevel.Warn,
+                LogSeverity.Error    => LogLevel.Error,
+                LogSeverity.Critical => LogLevel.Fatal,
+                _                    => (LogLevel)message.Severity
+            };
             await Log.WriteAsync("Client", string.Format(
                 "{1} [{2}]: {0}",
                 message.Message,
                 message.Source,
                 message.Severity
-            ));
+            ), logLevel);
         }
     }
 }
