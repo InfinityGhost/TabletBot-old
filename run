@@ -1,3 +1,4 @@
+#!/bin/bash
 args=($@)
 
 if [ -n "$DISCORD_TOKEN" ]; then

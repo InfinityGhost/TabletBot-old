@@ -25,9 +25,9 @@ namespace TabletBot
                 {
                     Argument = new Argument<string>("githubToken")
                 },
-                new Option<bool?>("--unit", "Runs the bot as a unit." )
+                new Option<bool>("--unit", "Runs the bot as a unit." )
                 {
-                    Argument = new Argument<bool?>("unit")
+                    Argument = new Argument<bool>("unit")
                 },
                 new Option<LogLevel?>("--level", "Limits logging to a specific minimum log level.")
                 {
@@ -35,16 +35,16 @@ namespace TabletBot
                 }
             };
 
-            root.Handler = CommandHandler.Create<string, string, bool?, LogLevel?>((discordToken, githubToken, unit, level) =>
+            root.Handler = CommandHandler.Create<string, string, bool, LogLevel?>((discordToken, githubToken, unit, level) =>
             {
                 if (discordToken != null)
                     Settings.Current.DiscordBotToken = discordToken;
                 if (githubToken != null)
                     Settings.Current.GitHubToken = githubToken;
-                if (unit is bool useUnit)
-                    Settings.Current.RunAsUnit = useUnit;
                 if (level is LogLevel limitLevel)
                     Settings.Current.LogLevel = limitLevel;
+
+                Settings.Current.RunAsUnit = unit;
             });
 
             if (await root.InvokeAsync(args) != 0)
@@ -53,7 +53,7 @@ namespace TabletBot
             Log.Output += (message) =>
             {
                 if (message.Level >= Settings.Current.LogLevel)
-                    IO.WriteLine(message);
+                    IO.WriteLogMessage(message);
             };
 
             if (!Settings.Current.RunAsUnit)

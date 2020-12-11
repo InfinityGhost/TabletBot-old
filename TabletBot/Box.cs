@@ -11,7 +11,7 @@ namespace TabletBot
             var headerText = string.IsNullOrWhiteSpace(header) ? string.Empty : $" {header} ";
             IO.WriteLine(
                 IO.BOX_VERTICAL_RIGHT + headerText +
-                string.Concat(Enumerable.Repeat(IO.BOX_HORIZONTAL, Console.WindowWidth - 2 - headerText.Length)) +
+                IO.Repeat(IO.BOX_HORIZONTAL, Console.WindowWidth - 2 - headerText.Length) +
                 IO.BOX_VERTICAL_LEFT
             );
         }
@@ -20,7 +20,7 @@ namespace TabletBot
         {
             IO.WriteLine(
                 IO.BOX_VERTICAL_RIGHT +
-                string.Concat(Enumerable.Repeat(IO.BOX_HORIZONTAL, Console.WindowWidth - 2)) +
+                IO.Repeat(IO.BOX_HORIZONTAL, Console.WindowWidth - 2) +
                 IO.BOX_VERTICAL_LEFT
             );
         }

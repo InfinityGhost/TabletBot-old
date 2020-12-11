@@ -29,7 +29,7 @@ namespace TabletBot
             Bot.Current.IsRunning = false;
         }
 
-        [Command("Channel ID", "Message")]
+        [Command("Channel ID", "Message"), Alias("Message")]
         public static async void SendMessage(params string[] args)
         {
             ulong id = Convert.ToUInt64(args[0]);
@@ -119,34 +119,6 @@ namespace TabletBot
             else
             {
                 await Log.WriteAsync("Settings", $"Role '{args}' does not exist.");
-            }
-        }
-
-        [Command]
-        public static void ListSelfRoles(params string[] args)
-        {
-            if (Bot.Current != null)
-            {
-                var selfRoles =
-                    from role in Bot.Current.DiscordClient.GetGuild(Settings.Current.GuildID).Roles
-                    where Settings.Current.SelfRoles.Contains(role.Id)
-                    select (role.Name, role.Id);
-                using (var box = new Box("Self Assignable Roles"))
-                {
-                    foreach (var role in selfRoles)
-                        box.WriteLine($"{role.Name} ({role.Id})");
-                }
-            }
-            else
-            {
-                var selfRoles = from role in Settings.Current.SelfRoles
-                    select role.ToString();
-                    
-                using (var box = new Box("Self Assignable Roles"))
-                {
-                    foreach (var role in selfRoles)
-                        box.WriteLine(role);
-                }
             }
         }
     }

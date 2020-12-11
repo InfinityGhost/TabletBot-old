@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -21,8 +22,10 @@ namespace TabletBot.Common
         public string DiscordBotToken { set; get; } = null;
         public string GitHubToken { set; get; } = null;
         public string CommandPrefix { set; get; } = "!";
-        public bool RunAsUnit { set; get; } = false;
         public LogLevel LogLevel { set; get; } = LogLevel.Debug;
+
+        [JsonIgnore]
+        public bool RunAsUnit { set; get; } = false;
 
         public Collection<ulong> SelfRoles { set; get; } = new Collection<ulong>();
 
@@ -33,6 +36,8 @@ namespace TabletBot.Common
 
         public async Task Write(FileInfo file)
         {
+            if (!file.Directory.Exists)
+                file.Directory.Create();
             using (var fs = file.Create())
                 await JsonSerializer.SerializeAsync<Settings>(fs, this, options);
         }

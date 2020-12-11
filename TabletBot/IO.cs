@@ -126,22 +126,42 @@ namespace TabletBot
             );
         }
 
-        public static void WriteLine(LogMessage message)
+        public static void WriteLogMessage(LogMessage message)
         {
-            if (message is ExceptionLogMessage exceptionLogMessage)
+            switch (message, Settings.Current.RunAsUnit)
             {
-                using (var box = new Box(exceptionLogMessage.Exception.GetType().FullName))
-                    box.WriteLine(exceptionLogMessage.Exception.StackTrace);
-            }
-            else
-            {
-                WriteLine(
-                    $"{BOX_VERTICAL} " +
-                    $"{Clamp(message.Time.ToLongTimeString(), 11)} {BOX_VERTICAL} " +
-                    $"{Clamp(message.Level, 7)} {BOX_VERTICAL} " +
-                    $"{Clamp(message.Group, 10)} {BOX_VERTICAL} " +
-                    string.Format($"{{0,-{Console.WindowWidth - 40}}}", message.Message.Trim()) + BOX_VERTICAL
-                );
+                case (ExceptionLogMessage exceptionLogMessage, true):
+                {
+                    Console.Out.WriteLine(exceptionLogMessage.Exception);
+                    break;
+                }
+                case (ExceptionLogMessage exceptionLogMessage, false):
+                {
+                    using (var box = new Box(exceptionLogMessage.Exception.GetType().FullName))
+                    {
+                        box.WriteLine(exceptionLogMessage.Exception.Message);
+                        box.WriteLine(exceptionLogMessage.Exception.StackTrace);
+                    }
+                    break;
+                }
+                case (_, true):
+                {
+                    Console.Out.WriteLine(
+                        $"{Clamp(message.Level, 7)} {Clamp(message.Group, 10)} | {message.Message}"
+                    );
+                    break;
+                }
+                case (_, false):
+                {
+                    WriteLine(
+                        $"{BOX_VERTICAL} " +
+                        $"{Clamp(message.Time.ToLongTimeString(), 11)} {BOX_VERTICAL} " +
+                        $"{Clamp(message.Level, 7)} {BOX_VERTICAL} " +
+                        $"{Clamp(message.Group, 10)} {BOX_VERTICAL} " +
+                        string.Format($"{{0,-{Console.WindowWidth - 40}}}", message.Message.Trim()) + BOX_VERTICAL
+                    );
+                    break;
+                }
             }
         }
 
@@ -155,7 +175,8 @@ namespace TabletBot
 
         private static void WriteBufferPrefix()
         {
-            Console.Out.Write(InputBufferText);
+            if (!Settings.Current.RunAsUnit)
+                Console.Out.Write(InputBufferText);
         }
 
         private static string Clamp(object val, int length)
@@ -167,6 +188,6 @@ namespace TabletBot
                 return string.Format($"{{0,-{length}}}", str);
         }
 
-        private static string Repeat<T>(T value, int count) => string.Concat(Enumerable.Repeat(value, count));
+        public static string Repeat<T>(T value, int count) => string.Concat(Enumerable.Repeat(value, count));
     }
 }

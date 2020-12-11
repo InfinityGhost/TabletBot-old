@@ -18,9 +18,9 @@ namespace TabletBot
 
         public void Invoke(string[] args)
         {
-            if (args.Length != Arguments.Count)
+            if (args.Length < Arguments.Count)
             {
-                throw new ArgumentException("Invalid number of arguments.");
+                throw new ArgumentException("Not enough arguments specified.");
             }
 
             Method.Invoke(null, new object[] { args });

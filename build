@@ -1,1 +1,2 @@
+#!/bin/bash
 dotnet build TabletBot/TabletBot.csproj -o ./bin
