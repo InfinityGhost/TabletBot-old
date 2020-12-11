@@ -31,15 +31,15 @@ namespace TabletBot.Discord
         {
             if (!CommandsRegistered)
             {
-                await Log.WriteAsync("CommandSvc", "Registering commands...");
+                await Log.WriteAsync("CommandSvc", "Registering commands...", LogLevel.Debug);
                 foreach (var module in Commands)
                 {
                     await CommandService.AddModuleAsync(module, Services);
-                    await Log.WriteAsync("CommandSvc", $"Registered module '{module.Name}'.");
+                    await Log.WriteAsync("CommandSvc", $"Registered module '{module.Name}'.", LogLevel.Debug);
                 }
                 CommandService.CommandExecuted += CommandExecuted;
                 CommandsRegistered = true;
-                await Log.WriteAsync("CommandSvc", "Successfully registered commands.");
+                await Log.WriteAsync("CommandSvc", "Successfully registered commands.", LogLevel.Debug);
             }
         }
 

@@ -1,28 +1,27 @@
 using System;
 using System.Threading.Tasks;
-using Message = TabletBot.Common.LogMessage;
 
 namespace TabletBot.Common
 {
     public static class Log
     {
-        public static event EventHandler<Message> Output;
+        public static event Action<LogMessage> Output;
 
-        public static void Write(string group, string text)
+        public static void Write(string group, string text, LogLevel level = LogLevel.Info)
         {
-            Output?.Invoke(null, new Message(group, text));
+            Output?.Invoke(new LogMessage(group, text, level));
         }
 
-        public static async Task WriteAsync(string group, string text) => await Task.Run(() => Write(group, text));
+        public static async Task WriteAsync(string group, string text, LogLevel level = LogLevel.Info) => await Task.Run(() => Write(group, text, level));
 
-        public static void Debug(string text)
+        public static void Debug(string group, string text)
         {
-            Write("DEBUG", text);
+            Write(group, text, LogLevel.Debug);
         }
 
         public static void Exception(Exception exception)
         {
-            Write(exception.GetType().Name, exception.Message);
+            Output?.Invoke(new ExceptionLogMessage(exception));
         }
     }
 }

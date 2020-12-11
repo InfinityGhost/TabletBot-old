@@ -28,7 +28,7 @@ namespace TabletBot.Discord
             await RegisterCommands();
         }
 
-        public static Bot Current { set; get; }
+        public static Bot Current { set; get; } = new Bot();
         public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient();
 
         public bool IsRunning { set; get; } = true;
