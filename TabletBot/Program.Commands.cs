@@ -1,77 +1,92 @@
 using System;
-using System.Threading.Tasks;
-using TabletBot.Discord;
-using TabletBot.Common;
-using TabletBot.GitHub;
 using System.Linq;
-using System.IO;
-using System.Diagnostics;
+using System.Reflection;
+using TabletBot.Common;
+using TabletBot.Common.Attributes.Bot;
+using TabletBot.Discord;
 
 namespace TabletBot
 {
     partial class Program
     {
-        static BotCommandDictionary BotCommands { set; get; } = new BotCommandDictionary
+        [Command]
+        public static void Help(params string[] args)
         {
-            new BotCommand("help", Help),
-            new BotCommand("stop", Stop),
-            new BotCommand("send", SendMessage),
-            new BotCommand("github-login", GitHubLogin),
-            new BotCommand("save-settings", SaveSettings),
-            new BotCommand("add-selfrole", AddSelfRole),
-            new BotCommand("remove-selfrole", RemoveSelfRole),
-            new BotCommand("list-settings", ListSettings),
-            new BotCommand("list-selfroles", ListSelfRoles)
-        };
-
-        static void Help(string args)
-        {
-            var names =
-                from command in BotCommands
-                select command.Name;
-            using (new DividerWrap())
+            using (var box = new Box("Commands"))
             {
-                foreach (var name in names)
-                    Output.WriteLine(name);
+                foreach (var command in CommandCollection.Current)
+                {
+                    var argsOutput = command.Arguments.Count > 0 ? $"<{string.Join("> <", command.Arguments)}>" : null;
+                    var output = $"{command.Method.Name} {argsOutput}";
+                    box.WriteLine(output);
+                }
             }
         }
 
-        static void Stop(string args)
+        [Command, Alias("Exit")]
+        public static void Stop(params string[] args)
         {
             Bot.Current.IsRunning = false;
         }
 
-        static async void SendMessage(string args)
+        [Command("Channel ID", "Message")]
+        public static async void SendMessage(params string[] args)
         {
-            var tokens = args.Split(' ', 2);
-            await Bot.Current.Send(Convert.ToUInt64(tokens[0]), tokens[1]);
+            ulong id = Convert.ToUInt64(args[0]);
+            string message = string.Join(' ', args[1..^0]);
+            await Bot.Current.Send(id, message);
         }
 
-        static async void GitHubLogin(string token)
+        [Command]
+        public static async void ListSettings(params string[] args)
         {
-            GitHubAPI.Current = new GitHubAPI("TabletBot", token);
-            Settings.Current.GitHubAPIToken = token;
-            await Log.WriteAsync("GitHub", "Authenticated client.");
-        }
-
-        static async void ListSettings(string args)
-        {
-            using (new DividerWrap())
+            using (var box = new Box("Settings"))
             {
-                await foreach (var line in Settings.Current.ExportAsync())
-                Output.WriteLine(line);
+                var output = await Settings.Current.ExportAsync();
+                box.WriteLine(output);
             }
         }
 
-        static async void SaveSettings(string args)
+        [Command("Setting", "Value")]
+        public static void ModifySetting(params string[] args)
         {
-            Settings.Current.Write(Platform.SettingsFile);
+            var setting = args[0];
+            var valueStr = string.Concat(args[1..^0]);
+            
+            if (typeof(Settings).GetProperties().FirstOrDefault(p => p.Name.ToLower() == setting.ToLower()) is PropertyInfo property)
+            {
+                try
+                {
+                    object newValue;
+                    if (property.PropertyType.IsAssignableTo(typeof(Enum)))
+                        newValue = Enum.Parse(property.PropertyType, valueStr);
+                    else
+                        newValue = Convert.ChangeType(valueStr, property.PropertyType);
+                    property.SetValue(Settings.Current, newValue);
+                    Log.Write("Settings", "Updated setting.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Exception(ex);
+                }
+            }
+            else
+            {
+                Log.Write("Settings", $"Invalid setting: {setting}", LogLevel.Error);
+            }
+        }
+
+        [Command]
+        public static async void SaveSettings(params string[] args)
+        {
+            await Settings.Current.Write(Platform.SettingsFile);
             await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
         }
 
-        static async void AddSelfRole(string args)
+        [Command("Role ID")]
+        public static async void AddSelfRole(params string[] args)
         {
-            if (Tools.TryGetRole(args, out var roleId, out var name))
+            if (Tools.TryGetRole(string.Join(' ', args), out var roleId, out var name))
             {
                 var role = name != null ? $"'{name}' ({roleId})" : $"{roleId}";
 
@@ -89,9 +104,10 @@ namespace TabletBot
             }
         }
 
-        static async void RemoveSelfRole(string args)
+        [Command("Role ID")]
+        public static async void RemoveSelfRole(params string[] args)
         {
-            if (Tools.TryGetRole(args, out var roleId, out var name))
+            if (Tools.TryGetRole(string.Join(' ', args), out var roleId, out var name))
             {
                 var role = name != null ? $"'{name}' ({roleId})" : $"{roleId}";
                 
@@ -106,7 +122,8 @@ namespace TabletBot
             }
         }
 
-        static void ListSelfRoles(string args)
+        [Command]
+        public static void ListSelfRoles(params string[] args)
         {
             if (Bot.Current != null)
             {
@@ -114,22 +131,21 @@ namespace TabletBot
                     from role in Bot.Current.DiscordClient.GetGuild(Settings.Current.GuildID).Roles
                     where Settings.Current.SelfRoles.Contains(role.Id)
                     select (role.Name, role.Id);
-                using (new DividerWrap())
+                using (var box = new Box("Self Assignable Roles"))
                 {
                     foreach (var role in selfRoles)
-                        Output.WriteLine($"{role.Name} ({role.Id})");
+                        box.WriteLine($"{role.Name} ({role.Id})");
                 }
             }
             else
             {
-                var selfRoles =
-                    from role in Settings.Current.SelfRoles
+                var selfRoles = from role in Settings.Current.SelfRoles
                     select role.ToString();
                     
-                using (new DividerWrap())
+                using (var box = new Box("Self Assignable Roles"))
                 {
                     foreach (var role in selfRoles)
-                        Output.WriteLine(role);
+                        box.WriteLine(role);
                 }
             }
         }

@@ -20,7 +20,7 @@ namespace TabletBot.Discord.Commands
         public async Task ForceSaveSettings()
         {
             await Context.Message.DeleteAsync();
-            Settings.Current.Write(Platform.SettingsFile);
+            await Settings.Current.Write(Platform.SettingsFile);
             await Log.WriteAsync("Settings", $"Owner force-saved the configuration to {Platform.SettingsFile.FullName}");
         }
 

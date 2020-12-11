@@ -36,13 +36,6 @@ namespace TabletBot.Common
             }
         }
 
-        public static FileInfo SettingsFile
-        {
-            get
-            {
-                var path = Path.Join(AppData.FullName, "settings.xml");
-                return new FileInfo(path);
-            }
-        }
+        public static FileInfo SettingsFile => new FileInfo(Path.Join(AppData.FullName, "settings.json"));
     }
 }

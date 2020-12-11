@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace TabletBot.Common
@@ -16,40 +18,39 @@ namespace TabletBot.Common
         public static Settings Current { set; get; } = new Settings();
 
         public ulong GuildID { set; get; } = MainGuild;
-        public string DiscordBotToken { set; get; }
-        public string GitHubAPIToken { set; get; }
+        public string DiscordBotToken { set; get; } = null;
+        public string GitHubToken { set; get; } = null;
         public string CommandPrefix { set; get; } = "!";
+        public bool RunAsUnit { set; get; } = false;
+        public LogLevel LogLevel { set; get; } = LogLevel.Debug;
 
-        [XmlArray("SelfRoles"), XmlArrayItem("Role")]
         public Collection<ulong> SelfRoles { set; get; } = new Collection<ulong>();
 
-        public static readonly XmlSerializer Serializer = new XmlSerializer(typeof(Settings));
-
-        public void Write(FileInfo file)
+        private static JsonSerializerOptions options = new JsonSerializerOptions
         {
-            if (file.Exists)
-                file.Delete();
-            if (!file.Directory.Exists)
-                file.Directory.Create();
-            using (var fs = file.OpenWrite())
-                Serializer.Serialize(fs, this);
+            WriteIndented = true
+        };
+
+        public async Task Write(FileInfo file)
+        {
+            using (var fs = file.Create())
+                await JsonSerializer.SerializeAsync<Settings>(fs, this, options);
         }
 
-        public static Settings Read(FileInfo file)
+        public static async Task<Settings> Read(FileInfo file)
         {
             using (var fs = file.OpenRead())
-                return (Settings)Serializer.Deserialize(fs);
+                return await JsonSerializer.DeserializeAsync<Settings>(fs);
         }
 
-        public async IAsyncEnumerable<string> ExportAsync()
+        public async Task<string> ExportAsync()
         {
-            using (var ds = new MemoryStream())
-            using (var sr = new StreamReader(ds))
+            using (var ms = new MemoryStream())
             {
-                Serializer.Serialize(ds, this);
-                ds.Position = 0;
-                while (!sr.EndOfStream)
-                    yield return await sr.ReadLineAsync();
+                await JsonSerializer.SerializeAsync<Settings>(ms, this, options);
+                ms.Position = 0;
+                using (var sr = new StreamReader(ms))
+                    return await sr.ReadToEndAsync();
             }
         }
     }
