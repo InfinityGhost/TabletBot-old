@@ -29,26 +29,11 @@ namespace TabletBot
 
         public void WriteLine(string text)
         {
-            foreach (var line in Split(text))
+            foreach (var line in IO.Split(text, MaxLineLength))
             {
                 var padded = string.Format($"{{0,-{MaxLineLength}}}", line);
                 var formatted = $"{IO.BOX_VERTICAL} {padded} {IO.BOX_VERTICAL}";
                 IO.WriteLine(formatted);
-            }
-        }
-
-        public static IEnumerable<string> Split(string str)
-        {
-            foreach (var line in str.Split(Environment.NewLine))
-            {
-                int index = 0;
-                int length = 0;
-                while (index < line.Length)
-                {
-                    length = Math.Clamp(MaxLineLength, 0, line.Length - index);
-                    yield return line.Substring(index, length);
-                    index += length;
-                }
             }
         }
     }

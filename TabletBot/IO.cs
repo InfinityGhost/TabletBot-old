@@ -153,13 +153,29 @@ namespace TabletBot
                 }
                 case (_, false):
                 {
+                    int lineWidth = Console.WindowWidth - 40;
                     WriteLine(
                         $"{BOX_VERTICAL} " +
                         $"{Clamp(message.Time.ToLongTimeString(), 11)} {BOX_VERTICAL} " +
                         $"{Clamp(message.Level, 7)} {BOX_VERTICAL} " +
                         $"{Clamp(message.Group, 10)} {BOX_VERTICAL} " +
-                        string.Format($"{{0,-{Console.WindowWidth - 40}}}", message.Message.Trim()) + BOX_VERTICAL
+                        string.Format($"{{0,-{lineWidth}}}", Clamp(message.Message, lineWidth)) + BOX_VERTICAL
                     );
+                    if (message.Message.Length > lineWidth)
+                    {
+                        foreach (var line in Split(message.Message[lineWidth..^0], lineWidth))
+                        {
+                            WriteLine(
+                                $"{BOX_VERTICAL} " +
+                                $"{Repeat(' ', 11)} {BOX_VERTICAL} " +
+                                $"{Repeat(' ', 7)} {BOX_VERTICAL} " +
+                                $"{Repeat(' ', 10)} {BOX_VERTICAL} " +
+                                string.Format($"{{0,-{lineWidth}}}", line) +
+                                BOX_VERTICAL
+                            );
+                        }
+                    }
+                    
                     break;
                 }
             }
@@ -186,6 +202,21 @@ namespace TabletBot
                 return str.Substring(0, length);
             else
                 return string.Format($"{{0,-{length}}}", str);
+        }
+
+        public static IEnumerable<string> Split(string str, int maxLength)
+        {
+            foreach (var line in str.Split(Environment.NewLine))
+            {
+                int index = 0;
+                int length = 0;
+                while (index < line.Length)
+                {
+                    length = Math.Clamp(maxLength, 0, line.Length - index);
+                    yield return line.Substring(index, length);
+                    index += length;
+                }
+            }
         }
 
         public static string Repeat<T>(T value, int count) => string.Concat(Enumerable.Repeat(value, count));
