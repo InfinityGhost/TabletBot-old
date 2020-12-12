@@ -1,17 +1,24 @@
 ﻿using System;
+using System.Linq;
 
 namespace TabletBot.Common
 {
     public class LogMessage
     {
-        public readonly string Group;
-        public readonly string Text;
-        public readonly DateTime Time = DateTime.Now;
-
-        public LogMessage(string group, string text)
+        public LogMessage(
+            string group,
+            string message,
+            LogLevel level
+        )
         {
             Group = group;
-            Text = text;
+            Message = message;
+            Level = level;
         }
+
+        public string Group { get; }
+        public string Message { get; }
+        public LogLevel Level { get; }
+        public DateTime Time { get; } = DateTime.Now;
     }
 }
