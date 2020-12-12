@@ -3,71 +3,59 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using TabletBot.Common;
+using TabletBot.Common.Store;
 
 namespace TabletBot.Discord.Commands
 {
     public class RoleCommands : CommandModule
     {
-        private static bool IsSelfRole(IRole role)
+        
+        [Command("add-react-role", RunMode = RunMode.Async), Name("Add reactive role")]
+        [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
+        public async Task AddReactRole(IRole role, string emote)
         {
-            return Settings.Current.SelfRoles.Contains(role.Id);
-        }
-
-        [Command("addrole", RunMode = RunMode.Async), Name("Add Role"), Summary("Adds a self-manageable role to yourself.")]
-        public async Task AddRole([Remainder] IRole role)
-        {
+            var message = Context.Message.ReferencedMessage;
             await Context.Message.DeleteAsync();
-            if (Context.User is IGuildUser guildUser && IsSelfRole(role))
-            {
-                await guildUser.AddRoleAsync(role);
-                var message = await ReplyAsync($"Added the role '{role.Name}'.");
-                await message.DeleteDelayed();
-            }
-            else
-            {
-                var message = await ReplyAsync($"The role {role.Name} is not a self-manageable role.");
-                await message.DeleteDelayed();
-            }
-        }
-
-        [Command("removerole", RunMode = RunMode.Async), Name("Remove Role"), Summary("Removes a self-manageable role from yourself.")]
-        public async Task RemoveRole([Remainder] IRole role)
-        {
-            await Context.Message.DeleteAsync();
-            if (Context.User is IGuildUser guildUser && IsSelfRole(role))
-            {
-                await guildUser.RemoveRoleAsync(role);
-                var message = await ReplyAsync($"Removed the role '{role.Name}'.");
-                await message.DeleteDelayed();
-            }
-            else
-            {
-                var message = await ReplyAsync($"The role {role.Name} is not a self-manageable role.");
-                await message.DeleteDelayed();
-            }
-        }
-
-        [Command("listroles", RunMode = RunMode.Async), Name("List Roles"), Summary("Lists all self-manageable roles.")]
-        public async Task ListRoles()
-        {
-            await Context.Message.DeleteAsync();
-            var message = await ReplyAsync("Fetching self-manageable roles...");
-            var selfRoles =
-                from role in Context.Guild.Roles
-                where Settings.Current.SelfRoles.Contains(role.Id)
-                select role.Name;
             
-            var embed = new EmbedBuilder
+            if (message != null)
             {
-                Title = "Self-Manageable Roles",
-                ThumbnailUrl = Bot.Current.DiscordClient.CurrentUser.GetAvatarUrl(),
-                Footer = new EmbedFooterBuilder
+                try
                 {
-                    Text = $"Manage with either the `addrole` or the `removerole` command.",
+                    var emoji = new Emoji(emote);
+                    await message.AddReactionAsync(emoji);
                 }
-            };
-            embed.AddField("Roles", string.Join(", ", selfRoles));
-            await message.Update(embed);
+                catch
+                {
+                    var e = Emote.Parse(emote);
+                    await message.AddReactionAsync(e);
+                }
+                
+                var reactionRole = new RoleManagementMessageStore(message.Id, role.Id, emote);
+                Settings.Current.ReactionRoles.Add(reactionRole);
+                
+                var messageRef = new MessageReference(message.Id, message.Channel.Id);
+                var reply = await ReplyAsync($"Reaction role added: {reactionRole.EmoteName}", messageReference: messageRef);
+                reply.DeleteDelayed();
+            }
+            else
+            {
+                var reply = await ReplyAsync("Error: No message has been referenced.");
+                reply.DeleteDelayed();
+            }
+        }
+
+        [Command("remove-react-role", RunMode = RunMode.Async), Name("Remove reactive role")]
+        [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
+        public async Task RemoveReactRole(IRole role)
+        {
+            var message = Context.Message.ReferencedMessage;
+            await Context.Message.DeleteAsync();
+
+            var reactionRole = Settings.Current.ReactionRoles.FirstOrDefault(r => r.RoleId == role.Id);
+            
+            var messageRef = new MessageReference(message.Id, message.Channel.Id);
+            var reply = await ReplyAsync($"Reaction role added: {reactionRole.EmoteName}", messageReference: messageRef);
+            reply.DeleteDelayed();
         }
     }
 }

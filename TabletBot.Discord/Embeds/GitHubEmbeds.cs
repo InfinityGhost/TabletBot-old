@@ -5,9 +5,9 @@ namespace TabletBot.Discord.Embeds
 {
     public static class GitHubEmbeds
     {
-        public static EmbedBuilder GetIssueEmbed(Issue issue)
+        public static Embed GetIssueEmbed(Issue issue)
         {
-            return new EmbedBuilder
+            var embed = new EmbedBuilder
             {
                 Title = string.Format("{0} #{1}", issue.Title, issue.Number),
                 Timestamp = issue.CreatedAt,
@@ -19,11 +19,12 @@ namespace TabletBot.Discord.Embeds
                 },
                 Description = issue.Body
             };
+            return embed.Build();
         }
 
-        public static EmbedBuilder GetPullRequestEmbed(PullRequest pr)
+        public static Embed GetPullRequestEmbed(PullRequest pr)
         {
-            return new EmbedBuilder
+            var embed = new EmbedBuilder
             {
                 Title = string.Format("{0} #{1}", pr.Title, pr.Number),
                 Timestamp = pr.UpdatedAt,
@@ -35,6 +36,7 @@ namespace TabletBot.Discord.Embeds
                 },
                 Description = pr.Body ?? string.Empty
             };
+            return embed.Build();
         }
     }
 }

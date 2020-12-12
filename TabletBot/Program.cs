@@ -60,7 +60,7 @@ namespace TabletBot
                 IO.WriteMessageHeader();
 
             await Task.WhenAll(
-                Bot.Current.Setup(Settings.Current),
+                Bot.Current.Setup(),
                 AuthenticateGitHub(Settings.Current.GitHubToken)
             );
 

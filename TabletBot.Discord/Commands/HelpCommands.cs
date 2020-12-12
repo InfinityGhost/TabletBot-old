@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -29,14 +28,14 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync("Fetching help...");
-            
-            IEnumerable<ModuleInfo> modules = 
+
+            IEnumerable<ModuleInfo> modules =
                 from module in Commands.Modules
                 where !ExcludedModules.Contains(module.Name)
                 where module.Parent == null
                 select module;
-            
-            IEnumerable<CommandInfo> commands = 
+
+            IEnumerable<CommandInfo> commands =
                 from module in modules
                 from command in module.Commands
                 select command;

@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
+using TabletBot.Common.Store;
 
 namespace TabletBot.Common
 {
@@ -24,10 +23,10 @@ namespace TabletBot.Common
         public string CommandPrefix { set; get; } = "!";
         public LogLevel LogLevel { set; get; } = LogLevel.Debug;
 
+        public Collection<RoleManagementMessageStore> ReactionRoles { set; get; } = new Collection<RoleManagementMessageStore>();
+
         [JsonIgnore]
         public bool RunAsUnit { set; get; } = false;
-
-        public Collection<ulong> SelfRoles { set; get; } = new Collection<ulong>();
 
         private static JsonSerializerOptions options = new JsonSerializerOptions
         {

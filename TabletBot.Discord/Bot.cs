@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Octokit;
 using TabletBot.Common;
+using TabletBot.Discord.Commands;
 using TabletBot.Discord.Embeds;
 using TabletBot.GitHub;
 
 namespace TabletBot.Discord
 {
+    using static DiscordExtensions;
+
     public partial class Bot
     {
         public Bot()
@@ -18,18 +20,33 @@ namespace TabletBot.Discord
             DiscordClient.Log += (msg) => LogExtensions.WriteAsync(msg);
             DiscordClient.MessageReceived += MessageReceived;
             DiscordClient.MessageReceived += CheckForIssueRef;
-            DiscordClient.Ready += ClientReady;
+            DiscordClient.Ready += async () =>
+            {
+                DiscordClient.ReactionAdded += (msg, channel, reaction) => HandleReactionAdded((channel as ITextChannel), reaction);
+                DiscordClient.ReactionRemoved += (msg, channel, reaction) => HandleReactionRemoved((channel as ITextChannel), reaction);
+                await Log.WriteAsync("Client", "Hooked reaction events.");
+            };
         }
 
-        public async Task Setup(Settings settings)
+        public async Task Setup()
         {
-            if (settings.DiscordBotToken != null)
-                await Login(settings.DiscordBotToken);
-            await RegisterCommands();
+            if (Settings.Current.DiscordBotToken != null)
+            {
+                await Task.WhenAll(
+                    Login(Settings.Current.DiscordBotToken),
+                    RegisterCommands()
+                );
+            }
         }
 
         public static Bot Current { set; get; } = new Bot();
-        public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient();
+        public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient(
+            new DiscordSocketConfig
+            {
+                AlwaysDownloadUsers = true,
+                GuildSubscriptions = true
+            }
+        );
 
         public bool IsRunning { set; get; } = true;
 
@@ -68,11 +85,6 @@ namespace TabletBot.Discord
 
         #region Event Handlers
 
-        private async Task ClientReady()
-        {
-            await Task.WhenAll().ConfigureAwait(false);
-        }
-
         private async Task MessageReceived(IMessage message)
         {
             await Task.WhenAll(
@@ -93,9 +105,51 @@ namespace TabletBot.Discord
                     {
                         var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);
                         var embed = pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
-                        await message.Channel.SendMessageAsync(embed: embed.Build());
+                        await message.Channel.SendMessageAsync(embed: embed);
                     }
                 }
+            }
+        }
+
+        private async Task HandleReactionAdded(ITextChannel channel, SocketReaction reaction)
+        {
+            try
+            {
+                if (reaction.IsTracked(out var reactionRole))
+                {
+                    var guild = await DiscordClient.Rest.GetGuildAsync(channel.GuildId);
+                    var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
+                    var user = await guild.GetUserAsync(reaction.UserId);
+                    await user.AddRoleAsync(role);
+                }
+            }
+            catch (Exception ex)
+            {
+                var systemChannel = await channel.Guild.GetSystemChannelAsync();
+                var reply = await ReplyException(systemChannel ?? channel, ex);
+                reply.DeleteDelayed();
+                Log.Exception(ex);
+            }
+        }
+
+        private async Task HandleReactionRemoved(ITextChannel channel, SocketReaction reaction)
+        {
+            try
+            {
+                if (reaction.IsTracked(out var reactionRole))
+                {
+                    var guild = await DiscordClient.Rest.GetGuildAsync(channel.GuildId);
+                    var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
+                    var user = await guild.GetUserAsync(reaction.UserId);
+                    await user.RemoveRoleAsync(role);
+                }
+            }
+            catch (Exception ex)
+            {
+                var systemChannel = await channel.Guild.GetSystemChannelAsync();
+                var reply = await ReplyException(systemChannel ?? channel, ex);
+                reply.DeleteDelayed();
+                Log.Exception(ex);
             }
         }
 
