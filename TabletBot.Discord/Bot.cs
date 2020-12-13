@@ -5,6 +5,7 @@ using Discord;
 using Discord.WebSocket;
 using Octokit;
 using TabletBot.Common;
+using TabletBot.Common.Store;
 using TabletBot.Discord.Commands;
 using TabletBot.Discord.Embeds;
 using TabletBot.GitHub;
@@ -20,6 +21,7 @@ namespace TabletBot.Discord
             DiscordClient.Log += (msg) => LogExtensions.WriteAsync(msg);
             DiscordClient.MessageReceived += MessageReceived;
             DiscordClient.MessageReceived += CheckForIssueRef;
+            DiscordClient.MessageDeleted += HandleMessageDeleted;
             DiscordClient.Ready += async () =>
             {
                 DiscordClient.ReactionAdded += (msg, channel, reaction) => HandleReactionAdded((channel as ITextChannel), reaction);
@@ -109,6 +111,14 @@ namespace TabletBot.Discord
                     }
                 }
             }
+        }
+
+        private Task HandleMessageDeleted(Cacheable<IMessage, ulong> message, IMessageChannel channel)
+        {
+            if (Settings.Current.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
+                Settings.Current.ReactiveRoles.Remove(roleStore);
+
+            return Task.CompletedTask;
         }
 
         private async Task HandleReactionAdded(ITextChannel channel, SocketReaction reaction)

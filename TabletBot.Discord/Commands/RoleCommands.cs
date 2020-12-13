@@ -12,7 +12,7 @@ namespace TabletBot.Discord.Commands
 
         [Command("add-react-role", RunMode = RunMode.Async), Name("Add reactive role")]
         [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
-        public async Task AddReactRole(IRole role, string emote)
+        public async Task AddReactiveRole(IRole role, string emote)
         {
             var message = Context.Message.ReferencedMessage;
             var messageRef = new MessageReference(message.Id, message.Channel.Id);
@@ -21,7 +21,7 @@ namespace TabletBot.Discord.Commands
                 var emoji = emote.GetEmote();
                 await message.AddReactionAsync(emoji);
                 var reactionRole = new RoleManagementMessageStore(message.Id, role.Id, emote);
-                Settings.Current.ReactionRoles.Add(reactionRole);
+                Settings.Current.ReactiveRoles.Add(reactionRole);
 
                 var reply = await ReplyAsync($"Reactive role added: {reactionRole.EmoteName}", messageReference: messageRef);
                 reply.DeleteDelayed();
@@ -36,13 +36,13 @@ namespace TabletBot.Discord.Commands
 
         [Command("remove-react-role", RunMode = RunMode.Async), Name("Remove reactive role")]
         [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
-        public async Task RemoveReactRole(IRole role)
+        public async Task RemoveReactiveRole(IRole role)
         {
             var message = Context.Message.ReferencedMessage;
             var messageRef = new MessageReference(message.Id, message.Channel.Id);
-            if (Settings.Current.ReactionRoles.FirstOrDefault(r => r.RoleId == role.Id) is RoleManagementMessageStore reactiveRole)
+            if (Settings.Current.ReactiveRoles.FirstOrDefault(r => r.RoleId == role.Id) is RoleManagementMessageStore reactiveRole)
             {
-                Settings.Current.ReactionRoles.Remove(reactiveRole);
+                Settings.Current.ReactiveRoles.Remove(reactiveRole);
                 var emoji = reactiveRole.EmoteName.GetEmote();
                 await message.RemoveReactionAsync(emoji, Bot.Current.DiscordClient.CurrentUser);
                 var reply = await ReplyAsync($"Reactive role removed from: {reactiveRole.EmoteName}", messageReference: messageRef);

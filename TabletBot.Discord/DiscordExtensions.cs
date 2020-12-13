@@ -38,7 +38,7 @@ namespace TabletBot.Discord
                 return false;
             }
 
-            var query = from reactRole in Settings.Current.ReactionRoles
+            var query = from reactRole in Settings.Current.ReactiveRoles
                 where reactRole.MessageId == reaction.MessageId
                 where reactRole.EmoteName == reaction.Emote.ToString()
                 select reactRole;

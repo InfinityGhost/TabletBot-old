@@ -23,7 +23,7 @@ namespace TabletBot.Common
         public string CommandPrefix { set; get; } = "!";
         public LogLevel LogLevel { set; get; } = LogLevel.Debug;
 
-        public Collection<RoleManagementMessageStore> ReactionRoles { set; get; } = new Collection<RoleManagementMessageStore>();
+        public Collection<RoleManagementMessageStore> ReactiveRoles { set; get; } = new Collection<RoleManagementMessageStore>();
 
         [JsonIgnore]
         public bool RunAsUnit { set; get; } = false;
