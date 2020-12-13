@@ -82,44 +82,5 @@ namespace TabletBot
             await Settings.Current.Write(Platform.SettingsFile);
             await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
         }
-
-        [Command("Role ID")]
-        public static async void AddSelfRole(params string[] args)
-        {
-            if (Tools.TryGetRole(string.Join(' ', args), out var roleId, out var name))
-            {
-                var role = name != null ? $"'{name}' ({roleId})" : $"{roleId}";
-
-                if (!Settings.Current.SelfRoles.Contains(roleId))
-                {
-                    Settings.Current.SelfRoles.Add(roleId);
-                    await Log.WriteAsync("Settings", $"Added role {role} to self roles.");
-                }
-                else
-                    await Log.WriteAsync("Settings", $"Failed to add role {role} to self roles.");
-            }
-            else
-            {
-                await Log.WriteAsync("Settings", $"Role '{args}' does not exist.");
-            }
-        }
-
-        [Command("Role ID")]
-        public static async void RemoveSelfRole(params string[] args)
-        {
-            if (Tools.TryGetRole(string.Join(' ', args), out var roleId, out var name))
-            {
-                var role = name != null ? $"'{name}' ({roleId})" : $"{roleId}";
-                
-                if (Settings.Current.SelfRoles.Remove(roleId))
-                    await Log.WriteAsync("Settings", $"Removed role {role} from self roles.");
-                else
-                    await Log.WriteAsync("Settings", $"Failed to remove role {role} from self roles.");
-            }
-            else
-            {
-                await Log.WriteAsync("Settings", $"Role '{args}' does not exist.");
-            }
-        }
     }
 }

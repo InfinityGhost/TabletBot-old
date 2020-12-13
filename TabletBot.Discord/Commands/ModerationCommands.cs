@@ -38,7 +38,7 @@ namespace TabletBot.Discord.Commands
             await Context.Message.DeleteAsync();
             Settings.Current.CommandPrefix = prefix;
             var message = await ReplyAsync(string.Format("Set the command prefix to `{0}`.", Settings.Current.CommandPrefix));
-            await message.DeleteDelayed();
+            message.DeleteDelayed();
         }
     }
 }
