@@ -61,5 +61,10 @@ namespace TabletBot.Discord.Commands
 
             embed.AddField(field);
         }
+
+        public static IEmote GetEmote(this string emoteName)
+        {
+            return Emote.TryParse(emoteName, out var emote) ? emote : new Emoji(emoteName);
+        }
     }
 }
