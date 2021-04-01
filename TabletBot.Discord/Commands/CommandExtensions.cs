@@ -77,11 +77,11 @@ namespace TabletBot.Discord.Commands
             };
         }
 
-        public static EmbedFooterBuilder ToEmbedFooter(this IUser user)
+        public static EmbedFooterBuilder ToEmbedFooter(this IUser user, string textFormat = "{0}")
         {
             return new EmbedFooterBuilder
             {
-                Text = user.Username,
+                Text = string.Format(user.Username, textFormat),
                 IconUrl = user.GetAvatarUrl()
             };
         }
