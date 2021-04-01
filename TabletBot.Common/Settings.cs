@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
@@ -17,6 +18,7 @@ namespace TabletBot.Common
 
         public static Settings Current { set; get; } = new Settings();
 
+        public int DeleteDelay { set; get; } = 5000;
         public ulong GuildID { set; get; } = MainGuild;
         public string DiscordBotToken { set; get; } = null;
         public string GitHubToken { set; get; } = null;
@@ -24,6 +26,7 @@ namespace TabletBot.Common
         public LogLevel LogLevel { set; get; } = LogLevel.Debug;
 
         public Collection<RoleManagementMessageStore> ReactiveRoles { set; get; } = new Collection<RoleManagementMessageStore>();
+        public Collection<SnippetStore> Snippets { set; get; } = new Collection<SnippetStore>();
 
         [JsonIgnore]
         public bool RunAsUnit { set; get; } = false;
