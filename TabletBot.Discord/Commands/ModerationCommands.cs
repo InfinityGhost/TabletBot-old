@@ -40,5 +40,27 @@ namespace TabletBot.Discord.Commands
             var message = await ReplyAsync(string.Format("Set the command prefix to `{0}`.", Settings.Current.CommandPrefix));
             message.DeleteDelayed();
         }
+
+        [Command("set-reply-delete-delay", RunMode = RunMode.Async), Name("Set bot reply delete delay"), RequireOwner]
+        public async Task SetReplyDeleteDelay(TimeSpan delay)
+        {
+            await Context.Message.DeleteAsync();
+            Settings.Current.DeleteDelay = (int)delay.TotalMilliseconds;
+            
+            var embed = new EmbedBuilder
+            {
+                Title = "Set message delay",
+                Fields =
+                {
+                    new EmbedFieldBuilder
+                    {
+                        Name = "Delay",
+                        Value = Settings.Current.DeleteDelay
+                    }
+                }
+            };
+            var message = await ReplyAsync(embed: embed.Build());
+            message.DeleteDelayed();
+        }
     }
 }

@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using TabletBot.Common;
-using TabletBot.Common.Store;
 
 namespace TabletBot.Discord.Commands
 {
@@ -36,8 +33,12 @@ namespace TabletBot.Discord.Commands
 
         public static async void DeleteDelayed(this IMessage message)
         {
-            await Task.Delay(CommandModule.DeleteDelay);
-            await message.DeleteAsync();
+            var delay = Settings.Current.DeleteDelay;
+            if (delay > 0)
+            {
+                await Task.Delay(delay);
+                await message.DeleteAsync();
+            }
         }
 
         public static void EmbedParameters(this CommandInfo command, ref EmbedBuilder embed)
@@ -65,6 +66,24 @@ namespace TabletBot.Discord.Commands
         public static IEmote GetEmote(this string emoteName)
         {
             return Emote.TryParse(emoteName, out var emote) ? emote : new Emoji(emoteName);
+        }
+
+        public static EmbedAuthorBuilder ToEmbedAuthor(this IUser user)
+        {
+            return new EmbedAuthorBuilder
+            {
+                Name = user.Username,
+                IconUrl = user.GetAvatarUrl()
+            };
+        }
+
+        public static EmbedFooterBuilder ToEmbedFooter(this IUser user, string textFormat = "{0}")
+        {
+            return new EmbedFooterBuilder
+            {
+                Text = string.Format(user.Username, textFormat),
+                IconUrl = user.GetAvatarUrl()
+            };
         }
     }
 }

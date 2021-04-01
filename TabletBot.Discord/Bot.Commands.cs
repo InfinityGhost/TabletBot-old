@@ -23,6 +23,7 @@ namespace TabletBot.Discord
             typeof(ModerationCommands),
             typeof(GitHubCommands),
             typeof(RoleCommands),
+            typeof(SnippetCommands),
             typeof(UserCommands),
             typeof(HelpCommands)
         };
