@@ -80,6 +80,7 @@ namespace TabletBot.Discord.Commands
             if (Snippets.FirstOrDefault(s => s.Prefix == prefix) is SnippetStore snippet)
             {
                 // Update the existing snippet
+                snippet.Title = title;
                 snippet.Content = content;
             }
             else
