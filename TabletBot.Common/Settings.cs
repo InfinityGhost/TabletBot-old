@@ -23,6 +23,8 @@ namespace TabletBot.Common
         public string DiscordBotToken { set; get; } = null;
         public string GitHubToken { set; get; } = null;
         public string CommandPrefix { set; get; } = "!";
+        public uint GitHubIssueRefLimit { set; get; } = 3;
+
         public LogLevel LogLevel { set; get; } = LogLevel.Debug;
 
         public Collection<RoleManagementMessageStore> ReactiveRoles { set; get; } = new Collection<RoleManagementMessageStore>();
