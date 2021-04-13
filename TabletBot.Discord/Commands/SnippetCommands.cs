@@ -89,8 +89,8 @@ namespace TabletBot.Discord.Commands
                 // Create a new snippet
                 snippet = new SnippetStore(prefix, title, content);
                 Snippets.Add(snippet);
-                await OverwriteSettings();
             }
+            await OverwriteSettings();
             await ReplyAsync(embed: GetSnippetEmbed(snippet).Build());
         }
 
