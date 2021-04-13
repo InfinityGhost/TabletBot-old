@@ -16,12 +16,12 @@ namespace TabletBot.Discord.Commands
             await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages);
         }
 
-        [Command("force-save", RunMode = RunMode.Async), Name("Force Save"), RequireOwner]
+        [Command("save", RunMode = RunMode.Async), Name("Force Save"), RequireOwner]
         public async Task ForceSaveSettings()
         {
             await Context.Message.DeleteAsync();
             await Settings.Current.Write(Platform.SettingsFile);
-            await Log.WriteAsync("Settings", $"Owner force-saved the configuration to {Platform.SettingsFile.FullName}");
+            await Log.WriteAsync("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {Platform.SettingsFile.FullName}");
         }
 
         [Command("kill-bot", RunMode = RunMode.Async), Name("Kill Bot"), RequireOwner]

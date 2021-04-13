@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -89,6 +90,7 @@ namespace TabletBot.Discord.Commands
                 snippet = new SnippetStore(prefix, title, content);
                 Snippets.Add(snippet);
             }
+            await OverwriteSettings();
             await ReplyAsync(embed: GetSnippetEmbed(snippet).Build());
         }
 
@@ -115,6 +117,7 @@ namespace TabletBot.Discord.Commands
                         }
                     }
                 };
+                await OverwriteSettings();
             }
             else
             {
@@ -143,6 +146,18 @@ namespace TabletBot.Discord.Commands
                 sb.AppendLine(CODE_BLOCK);
 
                 await ReplyAsync(sb.ToString());
+            }
+            else
+            {
+                var result = new EmbedBuilder
+                {
+                    Color = Color.Red,
+                    Title = "Failed to export snippet",
+                    Description = "The snippet was not found."
+                };
+
+                var message = await ReplyAsync(embed : result.Build());
+                message.DeleteDelayed();
             }
         }
 

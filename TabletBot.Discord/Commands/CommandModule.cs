@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Discord.Commands;
+using TabletBot.Common;
 
 namespace TabletBot.Discord.Commands
 {
@@ -11,5 +13,12 @@ namespace TabletBot.Discord.Commands
 
         protected const string QUOTE_PREFIX = "> ";
         protected const string CODE_BLOCK = "```";
+
+        protected async Task OverwriteSettings()
+        {
+            Platform.SettingsFile.Refresh();
+            if (Platform.SettingsFile.Exists)
+                await Settings.Current.Write(Platform.SettingsFile);
+        }
     }
 }
