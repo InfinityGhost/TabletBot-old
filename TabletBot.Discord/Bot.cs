@@ -99,8 +99,12 @@ namespace TabletBot.Discord
         {
             if (GitHubTools.TryGetIssueRefNumbers(message.Content, out var refs))
             {
+                uint refNum = 0;
                 foreach (int issueRef in refs)
                 {
+                    if (refNum == Settings.Current.GitHubIssueRefLimit)
+                        break;
+
                     var issues = await GitHubAPI.Current.Issue.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
                     var prs = await GitHubAPI.Current.PullRequest.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
                     if (issues.FirstOrDefault(i => i.Number == issueRef) is Issue issue)
@@ -109,6 +113,7 @@ namespace TabletBot.Discord
                         var embed = pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
                         await message.Channel.SendMessageAsync(embed: embed);
                     }
+                    refNum++;
                 }
             }
         }
