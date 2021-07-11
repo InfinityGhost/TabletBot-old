@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -145,7 +146,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
             var title = command.GetValue<string>("title");
-            var content = command.GetValue<string>("content");
+            var content = command.GetValue<string>("content").Replace(@"\n", Environment.NewLine);
 
             if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
             {
@@ -180,7 +181,7 @@ namespace TabletBot.Discord.SlashCommands
                     {
                         new EmbedFieldBuilder
                         {
-                            Name = "Prefix",
+                            Name = "Snippet",
                             Value = snippet
                         }
                     }
@@ -202,8 +203,9 @@ namespace TabletBot.Discord.SlashCommands
             if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
             {
                 var sb = new StringBuilder();
+                sb.AppendLine(Formatting.CODE_AFFIX + store.Title + Formatting.CODE_AFFIX);
                 sb.AppendLine(Formatting.CODE_BLOCK);
-                sb.AppendLine(store.Content);
+                sb.AppendLine(store.Content.Replace(Environment.NewLine, @"\n"));
                 sb.AppendLine(Formatting.CODE_BLOCK);
 
                 await command.RespondAsync(sb.ToString());

@@ -9,7 +9,7 @@ namespace TabletBot.Discord.SlashCommands
     public class UserSlashCommands : SlashCommandModule
     {
         protected const string SET_TABLET = "tablet";
-        protected const string CREATE_EMBED = "create-embed";
+        protected const string CREATE_EMBED = "embed";
 
         protected override IEnumerable<SlashCommand> GetSlashCommands()
         {
@@ -123,7 +123,7 @@ namespace TabletBot.Discord.SlashCommands
             if (title != null)
                 embed = embed.WithTitle(title);
             if (description != null)
-                embed = embed.WithDescription(description);
+                embed = embed.WithDescription(description.Replace(@"\n", Environment.NewLine));
             if (color != null)
                 embed = embed.WithColor(color.Value);
             if (url != null)
