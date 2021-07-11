@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Common;
+using TabletBot.Common.Reflection;
 using TabletBot.Discord.Commands;
+using TabletBot.Discord.SlashCommands;
 
 namespace TabletBot.Discord
 {
@@ -17,8 +21,9 @@ namespace TabletBot.Discord
             .BuildServiceProvider();
 
         public bool CommandsRegistered { private set; get; } = false;
+        public bool SlashCommandsRegistered { private set; get; } = false;
 
-        public Collection<Type> Commands { private set; get; } = new Collection<Type>()
+        public IReadOnlyCollection<Type> Commands { private set; get; } = new Collection<Type>
         {
             typeof(ModerationCommands),
             typeof(GitHubCommands),
@@ -28,7 +33,30 @@ namespace TabletBot.Discord
             typeof(HelpCommands)
         };
 
-        public async Task RegisterCommands()
+        public IReadOnlyCollection<Type> SlashCommands { private set; get; } = new Collection<Type>
+        {
+            typeof(SnippetSlashCommands)
+        };
+
+        private IList<SlashCommandModule> SlashCommandModules { get; } = new List<SlashCommandModule>();
+
+        public async Task UpdateSlashCommands()
+        {
+            foreach (var module in SlashCommandModules)
+            {
+                try
+                {
+                    await module.Update(DiscordClient);
+                    await Log.WriteAsync("CommandSvc", $"Reregistered slash command module '{module.GetType().Name}'.", LogLevel.Debug);
+                }
+                catch (Exception ex)
+                {
+                    Log.Exception(ex);
+                }
+            }
+        }
+
+        private async Task RegisterCommands()
         {
             if (!CommandsRegistered)
             {
@@ -36,11 +64,35 @@ namespace TabletBot.Discord
                 foreach (var module in Commands)
                 {
                     await CommandService.AddModuleAsync(module, Services);
-                    await Log.WriteAsync("CommandSvc", $"Registered module '{module.Name}'.", LogLevel.Debug);
+                    await Log.WriteAsync("CommandSvc", $"Registered command module '{module.Name}'.", LogLevel.Debug);
                 }
                 CommandService.CommandExecuted += CommandExecuted;
                 CommandsRegistered = true;
                 await Log.WriteAsync("CommandSvc", "Successfully registered commands.", LogLevel.Debug);
+            }
+        }
+
+        private async Task RegisterSlashCommands()
+        {
+            if (!SlashCommandsRegistered)
+            {
+                await Log.WriteAsync("CommandSvc", "Registering slash commands...", LogLevel.Debug);
+                foreach (var module in SlashCommands)
+                {
+                    try
+                    {
+                        var instance = module.GetTypeInfo().Construct<SlashCommandModule>();
+                        await instance.Hook(DiscordClient);
+                        SlashCommandModules.Add(instance);
+                        await Log.WriteAsync("CommandSvc", $"Registered slash command module '{module.Name}'.", LogLevel.Debug);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Exception(ex);
+                    }
+                }
+                SlashCommandsRegistered = true;
+                await Log.WriteAsync("CommandSvc", "Successfully registered slash commands.", LogLevel.Debug);
             }
         }
 

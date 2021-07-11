@@ -62,5 +62,12 @@ namespace TabletBot.Common
                     return await sr.ReadToEndAsync();
             }
         }
+
+        public async Task Overwrite()
+        {
+            Platform.SettingsFile.Refresh();
+            if (Platform.SettingsFile.Exists)
+                await Write(Platform.SettingsFile);
+        }
     }
 }

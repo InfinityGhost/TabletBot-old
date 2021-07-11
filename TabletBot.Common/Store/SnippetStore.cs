@@ -6,17 +6,17 @@ namespace TabletBot.Common.Store
         {
         }
 
-        public SnippetStore(string prefix, string title, string snippet)
+        public SnippetStore(string snippet, string title, string content)
         {
-            Prefix = prefix;
+            Snippet = snippet;
             Title = title;
-            Content = snippet;
+            Content = content;
         }
 
         /// <summary>
         /// The prefix which will retrieve this snippet.
         /// </summary>
-        public string Prefix { set; get; }
+        public string Snippet { set; get; }
 
         /// <summary>
         /// The title of the snippet.

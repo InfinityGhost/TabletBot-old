@@ -22,22 +22,14 @@ namespace TabletBot.Discord
             DiscordClient.MessageReceived += MessageReceived;
             DiscordClient.MessageReceived += CheckForIssueRef;
             DiscordClient.MessageDeleted += HandleMessageDeleted;
-            DiscordClient.Ready += async () =>
-            {
-                DiscordClient.ReactionAdded += (msg, channel, reaction) => HandleReactionAdded((channel as ITextChannel), reaction);
-                DiscordClient.ReactionRemoved += (msg, channel, reaction) => HandleReactionRemoved((channel as ITextChannel), reaction);
-                await Log.WriteAsync("Client", "Hooked reaction events.");
-            };
+            DiscordClient.Ready += Ready;
         }
 
         public async Task Setup()
         {
             if (Settings.Current.DiscordBotToken != null)
             {
-                await Task.WhenAll(
-                    Login(Settings.Current.DiscordBotToken),
-                    RegisterCommands()
-                );
+                await Login(Settings.Current.DiscordBotToken);
             }
         }
 
@@ -45,8 +37,7 @@ namespace TabletBot.Discord
         public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient(
             new DiscordSocketConfig
             {
-                AlwaysDownloadUsers = true,
-                GuildSubscriptions = true
+                AlwaysDownloadUsers = true
             }
         );
 
@@ -87,6 +78,19 @@ namespace TabletBot.Discord
 
         #region Event Handlers
 
+        private async Task Ready()
+        {
+            DiscordClient.ReactionAdded += HandleReactionAdded;
+            DiscordClient.ReactionRemoved += HandleReactionRemoved;
+            await Log.WriteAsync("Client", "Hooked reaction events.");
+
+            // Register commands
+            await Task.WhenAll(
+                RegisterCommands(),
+                RegisterSlashCommands()
+            );
+        }
+
         private async Task MessageReceived(IMessage message)
         {
             await Task.WhenAll(
@@ -118,12 +122,24 @@ namespace TabletBot.Discord
             }
         }
 
-        private Task HandleMessageDeleted(Cacheable<IMessage, ulong> message, IMessageChannel channel)
+        private Task HandleMessageDeleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel)
         {
             if (Settings.Current.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
                 Settings.Current.ReactiveRoles.Remove(roleStore);
 
             return Task.CompletedTask;
+        }
+
+        private async Task HandleReactionAdded(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
+        {
+            var textChannel = await channel.GetOrDownloadAsync() as ITextChannel;
+            await HandleReactionAdded(textChannel, reaction);
+        }
+
+        private async Task HandleReactionRemoved(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
+        {
+            var textChannel = await channel.GetOrDownloadAsync() as ITextChannel;
+            await HandleReactionRemoved(textChannel, reaction);
         }
 
         private async Task HandleReactionAdded(ITextChannel channel, SocketReaction reaction)

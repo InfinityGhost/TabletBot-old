@@ -1,2 +1,2 @@
-#!/bin/bash
+#!/usr/bin/env bash
 dotnet build TabletBot/TabletBot.csproj -o ./bin

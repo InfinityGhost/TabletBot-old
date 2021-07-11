@@ -1,7 +1,6 @@
 ﻿using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Linq;
 using System.Threading.Tasks;
 using TabletBot.Common;
 using TabletBot.Discord;
@@ -37,10 +36,9 @@ namespace TabletBot
 
             root.Handler = CommandHandler.Create<string, string, bool, LogLevel?>((discordToken, githubToken, unit, level) =>
             {
-                if (discordToken != null)
-                    Settings.Current.DiscordBotToken = discordToken;
-                if (githubToken != null)
-                    Settings.Current.GitHubToken = githubToken;
+                Settings.Current.DiscordBotToken ??= discordToken ?? Environment.GetEnvironmentVariable("DISCORD_TOKEN");
+                Settings.Current.GitHubToken ??= githubToken ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+                
                 if (level is LogLevel limitLevel)
                     Settings.Current.LogLevel = limitLevel;
 

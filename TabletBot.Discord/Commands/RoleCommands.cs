@@ -22,7 +22,7 @@ namespace TabletBot.Discord.Commands
                 await message.AddReactionAsync(emoji);
                 var reactionRole = new RoleManagementMessageStore(message.Id, role.Id, emote);
                 Settings.Current.ReactiveRoles.Add(reactionRole);
-                await OverwriteSettings();
+                await Settings.Current.Overwrite();
 
                 var reply = await ReplyAsync($"Reactive role added: {reactionRole.EmoteName}", messageReference: messageRef);
                 reply.DeleteDelayed();
@@ -46,7 +46,7 @@ namespace TabletBot.Discord.Commands
                 Settings.Current.ReactiveRoles.Remove(reactiveRole);
                 var emoji = reactiveRole.EmoteName.GetEmote();
                 await message.RemoveReactionAsync(emoji, Bot.Current.DiscordClient.CurrentUser);
-                await OverwriteSettings();
+                await Settings.Current.Overwrite();
                 
                 var reply = await ReplyAsync($"Reactive role removed from: {reactiveRole.EmoteName}", messageReference: messageRef);
                 reply.DeleteDelayed();

@@ -1,4 +1,5 @@
 obj/
 bin/
 */nupkg
-.vscode/ 
+.vscode/
+.idea/

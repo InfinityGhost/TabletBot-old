@@ -8,6 +8,7 @@ using Discord;
 using Discord.Commands;
 using TabletBot.Common;
 using TabletBot.Common.Store;
+using TabletBot.Discord.Embeds;
 
 namespace TabletBot.Discord.Commands
 {
@@ -26,7 +27,7 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message?.DeleteAsync();
 
-            if (TryGetSnippetEmbed(prefix, out var embed))
+            if (SnippetEmbeds.TryGetSnippetEmbed(prefix, out var embed))
             {
                 await ReplyAsync(embed: embed.Build());
             }
@@ -52,7 +53,7 @@ namespace TabletBot.Discord.Commands
                 foreach (var snippet in Snippets)
                 {
                     embed.AddField(
-                        CODE_AFFIX + snippet.Prefix + CODE_AFFIX,
+                        Formatting.CODE_AFFIX + snippet.Snippet + Formatting.CODE_AFFIX,
                         "   " + snippet.Title
                     );
                 }
@@ -78,20 +79,20 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message?.DeleteAsync();
 
-            if (Snippets.FirstOrDefault(s => s.Prefix == prefix) is SnippetStore snippet)
+            if (Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore store)
             {
                 // Update the existing snippet
-                snippet.Title = title;
-                snippet.Content = content;
+                store.Title = title;
+                store.Content = content;
             }
             else
             {
                 // Create a new snippet
-                snippet = new SnippetStore(prefix, title, content);
-                Snippets.Add(snippet);
+                store = new SnippetStore(prefix, title, content);
+                Snippets.Add(store);
             }
-            await OverwriteSettings();
-            await ReplyAsync(embed: GetSnippetEmbed(snippet).Build());
+            await Settings.Current.Overwrite();
+            await ReplyAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
         }
 
         [Command(REMOVE_SNIPPET, RunMode = RunMode.Async), Name("Delete snippet"), RequireUserPermission(GuildPermission.ManageGuild)]
@@ -101,7 +102,7 @@ namespace TabletBot.Discord.Commands
 
             EmbedBuilder result;
 
-            if (Snippets.FirstOrDefault(t => t.Prefix == prefix) is SnippetStore snippet)
+            if (Snippets.FirstOrDefault(t => t.Snippet == prefix) is SnippetStore snippet)
             {
                 Snippets.Remove(snippet);
                 result = new EmbedBuilder
@@ -117,7 +118,7 @@ namespace TabletBot.Discord.Commands
                         }
                     }
                 };
-                await OverwriteSettings();
+                await Settings.Current.Overwrite();
             }
             else
             {
@@ -138,12 +139,12 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message?.DeleteAsync();
 
-            if (Snippets.FirstOrDefault(s => s.Prefix == prefix) is SnippetStore snippet)
+            if (Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore snippet)
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(CODE_BLOCK);
+                sb.AppendLine(Formatting.CODE_BLOCK);
                 sb.AppendLine(snippet.Content);
-                sb.AppendLine(CODE_BLOCK);
+                sb.AppendLine(Formatting.CODE_BLOCK);
 
                 await ReplyAsync(sb.ToString());
             }
@@ -159,38 +160,6 @@ namespace TabletBot.Discord.Commands
                 var message = await ReplyAsync(embed : result.Build());
                 message.DeleteDelayed();
             }
-        }
-
-        private bool TryGetSnippetEmbed(string prefix, out EmbedBuilder embed)
-        {
-            if (Snippets.FirstOrDefault(s => s.Prefix == prefix) is SnippetStore snippet)
-            {
-                embed = GetSnippetEmbed(snippet);
-                return true;
-            }
-            else
-            {
-                embed = new EmbedBuilder
-                {
-                    Color = Color.Red,
-                    Title = "Failed to show snippet",
-                    Description = $"Failed to show the `{prefix}` snippet." + Environment.NewLine
-                        + "Verify that you have spelled it correctly."
-                };
-                return false;
-            }
-        }
-
-        private EmbedBuilder GetSnippetEmbed(SnippetStore snippet)
-        {
-            return new EmbedBuilder
-            {
-                Title = snippet.Title,
-                Color = Color.Magenta,
-                Description = snippet.Content,
-                Timestamp = Context.Message.Timestamp,
-                Footer = Context.User.ToEmbedFooter($"`{snippet.Prefix}` {{0}}")
-            };
         }
     }
 }
