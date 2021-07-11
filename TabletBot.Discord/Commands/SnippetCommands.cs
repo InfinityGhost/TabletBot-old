@@ -92,6 +92,7 @@ namespace TabletBot.Discord.Commands
                 Snippets.Add(store);
             }
             await Settings.Current.Overwrite();
+            await Bot.Current.UpdateSlashCommands();
             await ReplyAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
         }
 
@@ -119,6 +120,7 @@ namespace TabletBot.Discord.Commands
                     }
                 };
                 await Settings.Current.Overwrite();
+                await Bot.Current.UpdateSlashCommands();
             }
             else
             {
