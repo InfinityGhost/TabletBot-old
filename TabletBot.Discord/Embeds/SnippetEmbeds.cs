@@ -34,7 +34,11 @@ namespace TabletBot.Discord.Embeds
             {
                 Title = snippet.Title,
                 Color = Color.Magenta,
-                Description = snippet.Content
+                Description = snippet.Content,
+                Footer = new EmbedFooterBuilder
+                {
+                    Text = snippet.Snippet
+                }
             };
         }
     }

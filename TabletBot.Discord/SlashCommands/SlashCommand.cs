@@ -26,7 +26,7 @@ namespace TabletBot.Discord.SlashCommands
                 }
                 else
                 {
-                    await command.RespondAsync("You do not have permissions to use this command.");
+                    await command.RespondAsync("You do not have permissions to use this command.", ephemeral: true);
                 }
             }
             else

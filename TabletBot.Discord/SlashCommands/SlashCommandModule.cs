@@ -48,11 +48,5 @@ namespace TabletBot.Discord.SlashCommands
         {
             CommandHandlers = new List<SlashCommand>(GetSlashCommands());
         }
-
-        protected static T GetValue<T>(SocketSlashCommand command, string option)
-        {
-            var value = command.Data.Options.FirstOrDefault(o => o.Name == option).Value;
-            return value is T ? (T)value : default(T);
-        }
     }
 }

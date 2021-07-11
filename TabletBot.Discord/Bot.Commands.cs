@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -35,6 +34,8 @@ namespace TabletBot.Discord
 
         public IReadOnlyCollection<Type> SlashCommands { private set; get; } = new Collection<Type>
         {
+            typeof(ModerationSlashCommands),
+            typeof(UserSlashCommands),
             typeof(SnippetSlashCommands)
         };
 

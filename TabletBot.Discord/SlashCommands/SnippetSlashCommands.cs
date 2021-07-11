@@ -21,6 +21,8 @@ namespace TabletBot.Discord.SlashCommands
 
         protected override IEnumerable<SlashCommand> GetSlashCommands()
         {
+            var snippets = GetSnippets();
+
             yield return new SlashCommand
             {
                 Name = SHOW_SNIPPET,
@@ -37,7 +39,7 @@ namespace TabletBot.Discord.SlashCommands
                             Description = "The name of the snippet to show",
                             Type = ApplicationCommandOptionType.String,
                             Required = true,
-                            Choices = GetSnippets()
+                            Choices = snippets
                         }
                     }
                 }
@@ -100,7 +102,7 @@ namespace TabletBot.Discord.SlashCommands
                             Description = "The name of the snippet to remove",
                             Type = ApplicationCommandOptionType.String,
                             Required = true,
-                            Choices = GetSnippets()
+                            Choices = snippets
                         }
                     }
                 }
@@ -122,7 +124,7 @@ namespace TabletBot.Discord.SlashCommands
                             Description = "The name of the snippet to export",
                             Type = ApplicationCommandOptionType.String,
                             Required = true,
-                            Choices = GetSnippets()
+                            Choices = snippets
                         }
                     }
                 }
@@ -131,7 +133,7 @@ namespace TabletBot.Discord.SlashCommands
 
         private static async Task ShowSnippet(SocketSlashCommand command)
         {
-            var snippet = GetValue<string>(command, "snippet");
+            var snippet = command.GetValue<string>("snippet");
 
             if (SnippetEmbeds.TryGetSnippetEmbed(snippet, out var embed))
                 await command.RespondAsync(embed: embed.Build());
@@ -141,9 +143,9 @@ namespace TabletBot.Discord.SlashCommands
 
         private static async Task SetSnippet(SocketSlashCommand command)
         {
-            var snippet = GetValue<string>(command, "snippet");
-            var title = GetValue<string>(command, "title");
-            var content = GetValue<string>(command, "content");
+            var snippet = command.GetValue<string>("snippet");
+            var title = command.GetValue<string>("title");
+            var content = command.GetValue<string>("content");
 
             if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
             {
@@ -165,7 +167,7 @@ namespace TabletBot.Discord.SlashCommands
 
         private static async Task RemoveSnippet(SocketSlashCommand command)
         {
-            var snippet = GetValue<string>(command, "snippet");
+            var snippet = command.GetValue<string>("snippet");
 
             if (Snippets.FirstOrDefault(t => t.Snippet == snippet) is SnippetStore store)
             {
@@ -195,7 +197,7 @@ namespace TabletBot.Discord.SlashCommands
 
         private static async Task ExportSnippet(SocketSlashCommand command)
         {
-            var snippet = GetValue<string>(command, "snippet");
+            var snippet = command.GetValue<string>("snippet");
 
             if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
             {

@@ -37,7 +37,8 @@ namespace TabletBot.Discord
         public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient(
             new DiscordSocketConfig
             {
-                AlwaysDownloadUsers = true
+                AlwaysDownloadUsers = true,
+                AlwaysAcknowledgeInteractions = false
             }
         );
 
