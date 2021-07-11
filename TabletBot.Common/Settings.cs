@@ -10,16 +10,14 @@ namespace TabletBot.Common
 {
     public sealed class Settings
     {
-        public Settings()
-        {
-        }
-        
-        public const ulong MainGuild = 615607687467761684;
+        public const ulong MAIN_GUILD_ID = 615607687467761684;
+        public const ulong MODERATOR_ROLE_ID = 644180151755735060;
 
         public static Settings Current { set; get; } = new Settings();
 
         public int DeleteDelay { set; get; } = 5000;
-        public ulong GuildID { set; get; } = MainGuild;
+        public ulong GuildID { set; get; } = MAIN_GUILD_ID;
+        public ulong ModeratorRoleID { set; get; } = MODERATOR_ROLE_ID;
         public string DiscordBotToken { set; get; } = null;
         public string GitHubToken { set; get; } = null;
         public string CommandPrefix { set; get; } = "!";
