@@ -13,7 +13,7 @@ namespace TabletBot.Discord.SlashCommands
         public Func<SocketSlashCommand, Task> Handler { set; get; }
         public GuildPermissions? MinimumPermissions { set; get; }
 
-        public SlashCommandCreationProperties Build() => Builder.Build();
+        public SlashCommandProperties Build() => Builder.Build();
 
         public async Task Invoke(SocketSlashCommand command)
         {
