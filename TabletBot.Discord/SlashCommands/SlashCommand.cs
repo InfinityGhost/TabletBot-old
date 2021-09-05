@@ -13,7 +13,7 @@ namespace TabletBot.Discord.SlashCommands
         public Func<SocketSlashCommand, Task> Handler { set; get; }
         public GuildPermissions? MinimumPermissions { set; get; }
 
-        public SlashCommandProperties Build() => Builder.Build();
+        public SlashCommandCreationProperties Build() => Builder.Build();
 
         public async Task Invoke(SocketSlashCommand command)
         {
@@ -40,7 +40,7 @@ namespace TabletBot.Discord.SlashCommands
             var guildPermissions = MinimumPermissions.Value;
             var userPermissions = user.GuildPermissions;
 
-            return userPermissions.Administrator || 
+            return userPermissions.Administrator ||
                 guildPermissions.ToList().All(p => userPermissions.Has(p));
         }
     }
