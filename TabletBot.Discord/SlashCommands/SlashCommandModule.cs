@@ -18,7 +18,7 @@ namespace TabletBot.Discord.SlashCommands
             foreach (var command in CommandHandlers)
             {
                 var guildCommand = await client.Rest.CreateGuildCommand(command.Build(), Settings.Current.GuildID);
-                if (guildCommand.DefaultPermission == false)
+                if (guildCommand.IsDefaultPermission == false)
                     moderatorCommands.Add(guildCommand);
             }
 
@@ -38,7 +38,7 @@ namespace TabletBot.Discord.SlashCommands
             foreach (var command in CommandHandlers)
             {
                 var guildCommand = await client.Rest.CreateGuildCommand(command.Build(), Settings.Current.GuildID);
-                if (guildCommand.DefaultPermission == false)
+                if (guildCommand.IsDefaultPermission == false)
                     moderatorCommands.Add(guildCommand);
             }
 
