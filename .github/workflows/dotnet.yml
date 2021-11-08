@@ -18,7 +18,7 @@ jobs:
       - name: Publish
         env:
           runtime: linux-x64
-          framework: net5
+          framework: net5.0
           options: --configuration Release -p:DebugType=embedded --self-contained false
         run: |
           dotnet publish TabletBot $options --runtime $runtime --framework $framework -o build/$runtime
