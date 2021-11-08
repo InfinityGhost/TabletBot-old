@@ -21,9 +21,9 @@ jobs:
           framework: net5.0
           options: --configuration Release -p:DebugType=embedded --self-contained false
         run: |
-          dotnet publish TabletBot $options --runtime $runtime --framework $framework -o build/$runtime
+          dotnet publish TabletBot $options --runtime $runtime --framework $framework -o bin/$runtime
       - name: Upload artifacts
         uses: actions/upload-artifact@master
         with:
           name: TabletBot
-          path: build/linux-x64
+          path: bin/linux-x64
