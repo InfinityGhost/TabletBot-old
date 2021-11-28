@@ -35,7 +35,7 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "amount",
                             Description = "The number of messages to delete (defaults to 1)",
                             Type = ApplicationCommandOptionType.Integer,
-                            Required = false
+                            IsRequired = false
                         }
                     }
                 }
@@ -59,14 +59,14 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "user",
                             Description = "The user to kick",
                             Type = ApplicationCommandOptionType.User,
-                            Required = true
+                            IsRequired = true
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "reason",
                             Description = "The reason for the kick",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         }
                     }
                 }
@@ -90,14 +90,14 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "user",
                             Description = "The user to ban",
                             Type = ApplicationCommandOptionType.User,
-                            Required = true
+                            IsRequired = true
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "reason",
                             Description = "The reason for the ban",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         }
                     }
                 }
@@ -121,42 +121,42 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "title",
                             Description = "The title of the embed",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "description",
                             Description = "The description of the embed",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "color",
                             Description = "The color of the embed (hex)",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "url",
                             Description = "The url of the embed",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "footer",
                             Description = "The footer of the embed",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "image",
                             Description = "The image URL to display in the embed",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         }
                     }
                 }

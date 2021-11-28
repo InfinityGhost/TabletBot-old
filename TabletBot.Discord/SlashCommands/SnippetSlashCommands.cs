@@ -39,7 +39,7 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "snippet",
                             Description = "The name of the snippet to show",
                             Type = ApplicationCommandOptionType.String,
-                            Required = true,
+                            IsRequired = true,
                             Choices = snippets
                         }
                     }
@@ -64,21 +64,21 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "snippet",
                             Description = "The name of the snippet to set",
                             Type = ApplicationCommandOptionType.String,
-                            Required = true
+                            IsRequired = true
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "title",
                             Description = "The title of the snippet",
                             Type = ApplicationCommandOptionType.String,
-                            Required = true
+                            IsRequired = true
                         },
                         new SlashCommandOptionBuilder
                         {
                             Name = "content",
                             Description = "The content of the snippet",
                             Type = ApplicationCommandOptionType.String,
-                            Required = true
+                            IsRequired = true
                         }
                     },
                 },
@@ -102,7 +102,7 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "snippet",
                             Description = "The name of the snippet to remove",
                             Type = ApplicationCommandOptionType.String,
-                            Required = true,
+                            IsRequired = true,
                             Choices = snippets
                         }
                     }
@@ -124,7 +124,7 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "snippet",
                             Description = "The name of the snippet to export",
                             Type = ApplicationCommandOptionType.String,
-                            Required = true,
+                            IsRequired = true,
                             Choices = snippets
                         }
                     }
