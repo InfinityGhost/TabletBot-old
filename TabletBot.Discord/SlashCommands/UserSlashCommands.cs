@@ -27,7 +27,7 @@ namespace TabletBot.Discord.SlashCommands
                             Name = "tablet",
                             Description = "The name of the tablet you want to add to your nickname",
                             Type = ApplicationCommandOptionType.String,
-                            Required = false
+                            IsRequired = false
                         }
                     }
                 }
