@@ -3,24 +3,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Octokit;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using TabletBot.Common;
 using TabletBot.Common.Store;
-using TabletBot.Discord.Commands;
-using TabletBot.Discord.Embeds;
-using TabletBot.GitHub;
+using TabletBot.Discord.Watchers;
 
 namespace TabletBot.Discord
 {
-    using static DiscordExtensions;
-
     public partial class Bot
     {
         public Bot()
         {
             DiscordClient.Log += (msg) => LogExtensions.WriteAsync(msg);
             DiscordClient.MessageReceived += MessageReceived;
-            DiscordClient.MessageReceived += CheckForIssueRef;
             DiscordClient.MessageDeleted += HandleMessageDeleted;
             DiscordClient.Ready += Ready;
         }
@@ -80,46 +76,21 @@ namespace TabletBot.Discord
 
         private async Task Ready()
         {
-            DiscordClient.ReactionAdded += HandleReactionAdded;
-            DiscordClient.ReactionRemoved += HandleReactionRemoved;
-            await Log.WriteAsync("Client", "Hooked reaction events.");
+            var serviceCollection = BotServiceCollection.Build(DiscordClient);
+            serviceCollection  = serviceCollection.AddSingleton(serviceCollection);
 
-            // Register commands
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
             await Task.WhenAll(
-                RegisterCommands(),
-                RegisterSlashCommands()
+                RegisterMessageWatchers(serviceProvider),
+                RegisterReactionWatchers(serviceProvider),
+                RegisterSlashCommands(serviceProvider)
             );
         }
 
         private async Task MessageReceived(IMessage message)
         {
-            await Task.WhenAll(
-                LogExtensions.WriteAsync(message),
-                HandleCommand(message)
-            ).ConfigureAwait(false);
-        }
-
-        private async Task CheckForIssueRef(IMessage message)
-        {
-            if (GitHubTools.TryGetIssueRefNumbers(message.Content, out var refs))
-            {
-                uint refNum = 0;
-                foreach (int issueRef in refs)
-                {
-                    if (refNum == Settings.Current.GitHubIssueRefLimit)
-                        break;
-
-                    var issues = await GitHubAPI.Current.Issue.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
-                    var prs = await GitHubAPI.Current.PullRequest.GetAllForRepository("InfinityGhost", "OpenTabletDriver");
-                    if (issues.FirstOrDefault(i => i.Number == issueRef) is Issue issue)
-                    {
-                        var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);
-                        var embed = pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
-                        await message.Channel.SendMessageAsync(embed: embed);
-                    }
-                    refNum++;
-                }
-            }
+            await LogExtensions.WriteAsync(message).ConfigureAwait(false);
         }
 
         private Task HandleMessageDeleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel)
@@ -128,60 +99,6 @@ namespace TabletBot.Discord
                 Settings.Current.ReactiveRoles.Remove(roleStore);
 
             return Task.CompletedTask;
-        }
-
-        private async Task HandleReactionAdded(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
-        {
-            var textChannel = await channel.GetOrDownloadAsync() as ITextChannel;
-            await HandleReactionAdded(textChannel, reaction);
-        }
-
-        private async Task HandleReactionRemoved(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
-        {
-            var textChannel = await channel.GetOrDownloadAsync() as ITextChannel;
-            await HandleReactionRemoved(textChannel, reaction);
-        }
-
-        private async Task HandleReactionAdded(ITextChannel channel, SocketReaction reaction)
-        {
-            try
-            {
-                if (reaction.IsTracked(out var reactionRole))
-                {
-                    var guild = await DiscordClient.Rest.GetGuildAsync(channel.GuildId);
-                    var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
-                    var user = await guild.GetUserAsync(reaction.UserId);
-                    await user.AddRoleAsync(role);
-                }
-            }
-            catch (Exception ex)
-            {
-                var systemChannel = await channel.Guild.GetSystemChannelAsync();
-                var reply = await ReplyException(systemChannel ?? channel, ex);
-                reply.DeleteDelayed();
-                Log.Exception(ex);
-            }
-        }
-
-        private async Task HandleReactionRemoved(ITextChannel channel, SocketReaction reaction)
-        {
-            try
-            {
-                if (reaction.IsTracked(out var reactionRole))
-                {
-                    var guild = await DiscordClient.Rest.GetGuildAsync(channel.GuildId);
-                    var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
-                    var user = await guild.GetUserAsync(reaction.UserId);
-                    await user.RemoveRoleAsync(role);
-                }
-            }
-            catch (Exception ex)
-            {
-                var systemChannel = await channel.Guild.GetSystemChannelAsync();
-                var reply = await ReplyException(systemChannel ?? channel, ex);
-                reply.DeleteDelayed();
-                Log.Exception(ex);
-            }
         }
 
         #endregion
