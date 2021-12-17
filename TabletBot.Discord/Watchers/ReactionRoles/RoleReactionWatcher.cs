@@ -4,12 +4,13 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using TabletBot.Common;
+using TabletBot.Common.Store;
 using TabletBot.Discord.Commands;
 using static TabletBot.Discord.DiscordExtensions;
 
 namespace TabletBot.Discord.Watchers.ReactionRoles
 {
-    public class RoleReactionWatcher : IReactionWatcher
+    public class RoleReactionWatcher : IReactionWatcher, IMessageWatcher
     {
         private DiscordSocketClient _discordSocketClient;
 
@@ -70,6 +71,16 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
                 reply.DeleteDelayed();
                 Log.Exception(ex);
             }
+        }
+
+        public Task Receive(IMessage message) => Task.CompletedTask;
+
+        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel)
+        {
+            if (Settings.Current.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
+                Settings.Current.ReactiveRoles.Remove(roleStore);
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace TabletBot.Discord.Watchers.Commands
             }
         }
 
-        public Task Deleted(IMessage message) => Task.CompletedTask;
+        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
 
         public async Task InitializeAsync()
         {
@@ -49,12 +49,11 @@ namespace TabletBot.Discord.Watchers.Commands
             foreach (var module in _commands)
             {
                 await _commandService.AddModuleAsync(module, _serviceProvider);
-                await Log.WriteAsync("Setup", $"Registered command module '{module.Name}'.", LogLevel.Debug);
+                await Log.WriteAsync("CommandSvc", $"Registered command module '{module.Name}'.", LogLevel.Debug);
             }
 
             _commandService.CommandExecuted += CommandExecuted;
             _registered = true;
-            await Log.WriteAsync("Setup", "Message commands registered.", LogLevel.Debug);
         }
 
         private async Task CommandExecuted(Optional<CommandInfo> cmdInfo, ICommandContext context, IResult result)

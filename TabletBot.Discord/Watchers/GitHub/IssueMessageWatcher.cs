@@ -47,7 +47,7 @@ namespace TabletBot.Discord.Watchers.GitHub
             }
         }
 
-        public Task Deleted(IMessage message) => Task.CompletedTask;
+        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
 
         public static bool TryGetIssueRefNumbers(string message, out IEnumerable<int> refNums)
         {

@@ -4,7 +4,7 @@ using Discord.WebSocket;
 
 namespace TabletBot.Discord.Watchers
 {
-    public interface IReactionWatcher
+    public interface IReactionWatcher : IWatcher
     {
         Task ReactionAdded(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction);
         Task ReactionRemoved(Cacheable<IUserMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction);

@@ -16,7 +16,7 @@ namespace TabletBot.Discord.Watchers.Spam
             }
         }
 
-        public Task Deleted(IMessage message) => Task.CompletedTask;
+        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
 
         private readonly SpamMessageList _spamMessageList = new SpamMessageList();
     }

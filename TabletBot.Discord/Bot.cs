@@ -27,7 +27,6 @@ namespace TabletBot.Discord
 
             _discordSocketClient.Log += LogExtensions.WriteAsync;
             _discordSocketClient.MessageReceived += MessageReceived;
-            _discordSocketClient.MessageDeleted += HandleMessageDeleted;
             _discordSocketClient.Ready += Ready;
         }
 
@@ -45,11 +44,9 @@ namespace TabletBot.Discord
             }
         }
 
-        public bool IsRunning { set; get; } = true;
+        public bool IsRunning { set; get; }
 
-        #region Public Methods
-
-        public async Task Login(string token)
+        private async Task Login(string token)
         {
             if (token != null)
             {
@@ -78,19 +75,15 @@ namespace TabletBot.Discord
                 throw new InvalidCastException("The channel requested was not a valid text channel.");
         }
 
-        #endregion
-
-        #region Event Handlers
-
         private async Task Ready()
         {
             if (_registered)
                 return;
 
             await Task.WhenAll(
-                RegisterMessageWatchers(_messageWatchers, _discordSocketClient),
-                RegisterReactionWatchers(_reactionWatchers, _discordSocketClient),
-                RegisterInteractionWatchers(_interactionWatchers, _discordSocketClient)
+                RegisterWatchers(_messageWatchers, _discordSocketClient),
+                RegisterWatchers(_reactionWatchers, _discordSocketClient),
+                RegisterWatchers(_interactionWatchers, _discordSocketClient)
             );
 
             _registered = true;
@@ -101,14 +94,45 @@ namespace TabletBot.Discord
             await LogExtensions.WriteAsync(message).ConfigureAwait(false);
         }
 
-        private Task HandleMessageDeleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel)
+        private async Task RegisterWatchers(IEnumerable<IWatcher> watchers, DiscordSocketClient discordClient)
         {
-            if (Settings.Current.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
-                Settings.Current.ReactiveRoles.Remove(roleStore);
-
-            return Task.CompletedTask;
+            await Task.WhenAll(watchers.Select(w => RegisterWatcher(w, discordClient)));
         }
 
-        #endregion
+        private static async Task RegisterWatcher(IWatcher watcher, DiscordSocketClient discordClient)
+        {
+            if (watcher is IMessageWatcher messageWatcher)
+            {
+                discordClient.MessageReceived += messageWatcher.Receive;
+                discordClient.MessageDeleted += messageWatcher.Deleted;
+            }
+
+            if (watcher is IReactionWatcher reactionWatcher)
+            {
+                discordClient.ReactionAdded += reactionWatcher.ReactionAdded;
+                discordClient.ReactionRemoved += reactionWatcher.ReactionRemoved;
+            }
+
+            if (watcher is IInteractionWatcher interactionWatcher)
+            {
+                discordClient.InteractionCreated += interactionWatcher.HandleInteraction;
+            }
+
+            if (watcher is IAsyncInitialize asyncInitialize)
+            {
+                try
+                {
+                    await asyncInitialize.InitializeAsync();
+                }
+                catch (Exception e)
+                {
+                    Log.Exception(e);
+                    Log.Write("Setup", $"Failed to initialize watcher '{watcher.GetType().Name}'.");
+                    return;
+                }
+            }
+
+            Log.Write("Setup", $"Registered watcher '{watcher.GetType().Name}'.");
+        }
     }
 }
