@@ -1,15 +1,15 @@
-using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Discord.Commands;
 using TabletBot.Discord.SlashCommands;
+using TabletBot.Discord.Watchers;
 using TabletBot.Discord.Watchers.Commands;
 using TabletBot.Discord.Watchers.GitHub;
 using TabletBot.Discord.Watchers.ReactionRoles;
 using TabletBot.Discord.Watchers.Spam;
 
-namespace TabletBot.Discord.Watchers
+namespace TabletBot.Discord
 {
     public class BotServiceCollection : ServiceCollection
     {
