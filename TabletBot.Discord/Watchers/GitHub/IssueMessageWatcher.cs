@@ -7,7 +7,6 @@ using Discord;
 using Octokit;
 using TabletBot.Common;
 using TabletBot.Discord.Embeds;
-using TabletBot.GitHub;
 
 #nullable enable
 
@@ -15,6 +14,13 @@ namespace TabletBot.Discord.Watchers.GitHub
 {
     public class IssueMessageWatcher : IMessageWatcher
     {
+        private GitHubClient _gitHubClient;
+
+        public IssueMessageWatcher(GitHubClient gitHubClient)
+        {
+            _gitHubClient = gitHubClient;
+        }
+
         private const string OWNER = "OpenTabletDriver";
         private const string NAME = "OpenTabletDriver";
 
@@ -28,8 +34,8 @@ namespace TabletBot.Discord.Watchers.GitHub
                     if (refNum == Settings.Current.GitHubIssueRefLimit)
                         break;
 
-                    var issues = await GitHubAPI.Current.Issue.GetAllForRepository(OWNER, NAME);
-                    var prs = await GitHubAPI.Current.PullRequest.GetAllForRepository(OWNER, NAME);
+                    var issues = await _gitHubClient.Issue.GetAllForRepository(OWNER, NAME);
+                    var prs = await _gitHubClient.PullRequest.GetAllForRepository(OWNER, NAME);
                     if (issues.FirstOrDefault(i => i.Number == issueRef) is Issue issue)
                     {
                         var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);

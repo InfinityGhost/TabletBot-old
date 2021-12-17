@@ -34,7 +34,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
         {
             try
             {
-                if (reaction.IsTracked(out var reactionRole))
+                if (reaction.IsTracked(_discordSocketClient, out var reactionRole))
                 {
                     var guild = await _discordSocketClient.Rest.GetGuildAsync(channel.GuildId);
                     var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
@@ -55,7 +55,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
         {
             try
             {
-                if (reaction.IsTracked(out var reactionRole))
+                if (reaction.IsTracked(_discordSocketClient, out var reactionRole))
                 {
                     var guild = await _discordSocketClient.Rest.GetGuildAsync(channel.GuildId);
                     var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);

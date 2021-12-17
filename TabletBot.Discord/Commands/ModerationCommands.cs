@@ -8,6 +8,13 @@ namespace TabletBot.Discord.Commands
 {
     public class ModerationCommands : ModuleBase
     {
+        private readonly Bot _bot;
+
+        public ModerationCommands(Bot bot)
+        {
+            _bot = bot;
+        }
+
         [Command("delete", RunMode = RunMode.Async), Name("Delete"), Alias("del"), RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task DeleteMessage(int count = 1)
         {
@@ -28,7 +35,7 @@ namespace TabletBot.Discord.Commands
         public async Task ForceKillBot()
         {
             await Context.Message.DeleteAsync();
-            await Bot.Current.Logout();
+            await _bot.Logout();
             Environment.Exit(0x0);
         }
 

@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Common;
 
 namespace TabletBot.Discord.Watchers.Commands
@@ -13,25 +11,22 @@ namespace TabletBot.Discord.Watchers.Commands
     public class CommandMessageWatcher : IMessageWatcher, IAsyncInitialize
     {
         public CommandMessageWatcher(
+            IServiceProvider serviceProvider,
             DiscordSocketClient discordClient,
             CommandService commandService,
-            IServiceProvider serviceProvider,
-            IServiceCollection serviceCollection
+            IEnumerable<Type> modules
         )
         {
+            _serviceProvider = serviceProvider;
             _discordClient = discordClient;
             _commandService = commandService;
-            _serviceProvider = serviceProvider;
-
-            _commands = from serviceDescriptor in serviceCollection
-                where serviceDescriptor.ServiceType.IsAssignableFrom(typeof(ModuleBase<ICommandContext>))
-                select serviceDescriptor.ImplementationType!;
+            _commands = modules.OfType<ModuleBase<ICommandContext>>();
         }
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly IEnumerable<Type> _commands;
         private readonly IDiscordClient _discordClient;
         private readonly CommandService _commandService;
+        private readonly IEnumerable<Type> _commands;
 
         private bool _registered;
 

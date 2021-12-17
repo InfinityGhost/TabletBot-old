@@ -1,6 +1,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Octokit;
 using TabletBot.Discord.Commands;
 using TabletBot.Discord.SlashCommands;
 using TabletBot.Discord.Watchers;
@@ -17,11 +18,13 @@ namespace TabletBot.Discord
         {
         }
 
-        public static IServiceCollection Build(DiscordSocketClient discordClient)
+        public static IServiceCollection Build(DiscordSocketClient discordClient, GitHubClient gitHubClient)
         {
             return new BotServiceCollection()
                 // Core services
                 .AddSingleton(discordClient)
+                .AddSingleton(gitHubClient)
+                .AddSingleton<Bot>()
                 .AddSingleton<CommandService>()
                 // Message watchers
                 .AddMessageWatcher<CommandMessageWatcher>()

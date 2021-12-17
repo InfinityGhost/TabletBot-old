@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Discord.Commands;
@@ -29,7 +30,7 @@ namespace TabletBot.Discord.Watchers
         public static IServiceCollection AddCommandModule<T>(this IServiceCollection serviceCollection)
             where T : ModuleBase<ICommandContext>
         {
-            return serviceCollection.AddTransient<ModuleBase<ICommandContext>, T>();
+            return serviceCollection.AddSingleton<Type>(typeof(T));
         }
 
         public static IServiceCollection AddSlashCommandModule<T>(this IServiceCollection serviceCollection)
@@ -42,6 +43,11 @@ namespace TabletBot.Discord.Watchers
             where T : class, TSource
         {
             return enumerable.First(i => i is T) as T;
+        }
+
+        public static IEnumerable<Type> OfType<T>(this IEnumerable<Type> types)
+        {
+            return types.Where(t => t.IsAssignableFrom(typeof(T)));
         }
     }
 }

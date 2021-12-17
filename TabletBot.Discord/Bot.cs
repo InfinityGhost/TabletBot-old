@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -6,18 +7,35 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Common;
 using TabletBot.Common.Store;
+using TabletBot.Discord.Watchers;
 
 namespace TabletBot.Discord
 {
     public partial class Bot
     {
-        private Bot()
+        public Bot(
+            DiscordSocketClient discordSocketClient,
+            IEnumerable<IMessageWatcher> messageWatchers,
+            IEnumerable<IReactionWatcher> reactionWatchers,
+            IEnumerable<IInteractionWatcher> interactionWatchers
+        )
         {
-            DiscordClient.Log += LogExtensions.WriteAsync;
-            DiscordClient.MessageReceived += MessageReceived;
-            DiscordClient.MessageDeleted += HandleMessageDeleted;
-            DiscordClient.Ready += Ready;
+            _discordSocketClient = discordSocketClient;
+            _messageWatchers = messageWatchers;
+            _reactionWatchers = reactionWatchers;
+            _interactionWatchers = interactionWatchers;
+
+            _discordSocketClient.Log += LogExtensions.WriteAsync;
+            _discordSocketClient.MessageReceived += MessageReceived;
+            _discordSocketClient.MessageDeleted += HandleMessageDeleted;
+            _discordSocketClient.Ready += Ready;
         }
+
+        private bool _registered;
+        private readonly DiscordSocketClient _discordSocketClient;
+        private readonly IEnumerable<IMessageWatcher> _messageWatchers;
+        private readonly IEnumerable<IReactionWatcher> _reactionWatchers;
+        private readonly IEnumerable<IInteractionWatcher> _interactionWatchers;
 
         public async Task Setup()
         {
@@ -27,15 +45,6 @@ namespace TabletBot.Discord
             }
         }
 
-        public static Bot Current { set; get; } = new Bot();
-
-        public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient(
-            new DiscordSocketConfig
-            {
-                AlwaysDownloadUsers = true
-            }
-        );
-
         public bool IsRunning { set; get; } = true;
 
         #region Public Methods
@@ -44,8 +53,8 @@ namespace TabletBot.Discord
         {
             if (token != null)
             {
-                await DiscordClient.LoginAsync(TokenType.Bot, token);
-                await DiscordClient.StartAsync();
+                await _discordSocketClient.LoginAsync(TokenType.Bot, token);
+                await _discordSocketClient.StartAsync();
                 IsRunning = true;
             }
             else
@@ -56,13 +65,13 @@ namespace TabletBot.Discord
 
         public async Task Logout()
         {
-            await DiscordClient.LogoutAsync();
+            await _discordSocketClient.LogoutAsync();
             IsRunning = false;
         }
 
         public async Task Send(ulong channelId, string message)
         {
-            var channel = DiscordClient.GetChannel(channelId);
+            var channel = _discordSocketClient.GetChannel(channelId);
             if (channel is ITextChannel textChannel)
                 await textChannel.SendMessageAsync(message).ConfigureAwait(false);
             else
@@ -75,16 +84,16 @@ namespace TabletBot.Discord
 
         private async Task Ready()
         {
-            var serviceCollection = BotServiceCollection.Build(DiscordClient);
-            serviceCollection  = serviceCollection.AddSingleton(serviceCollection);
-
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            if (_registered)
+                return;
 
             await Task.WhenAll(
-                RegisterMessageWatchers(serviceProvider),
-                RegisterReactionWatchers(serviceProvider),
-                RegisterInteractionWatchers(serviceProvider)
+                RegisterMessageWatchers(_messageWatchers, _discordSocketClient),
+                RegisterReactionWatchers(_reactionWatchers, _discordSocketClient),
+                RegisterInteractionWatchers(_interactionWatchers, _discordSocketClient)
             );
+
+            _registered = true;
         }
 
         private async Task MessageReceived(IMessage message)

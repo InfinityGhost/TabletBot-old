@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Common;
 using TabletBot.Discord.Watchers;
@@ -8,97 +10,78 @@ namespace TabletBot.Discord
 {
     public partial class Bot
     {
-        private bool _messageWatchersRegistered;
-        private bool _reactionWatchersRegistered;
-        private bool _interactionWatchersRegistered;
-
-        private async Task RegisterMessageWatchers(IServiceProvider serviceProvider)
+        private async Task RegisterMessageWatchers(IEnumerable<IMessageWatcher> watchers, DiscordSocketClient discordClient)
         {
-            if (!_messageWatchersRegistered)
+            Log.Write("Setup", "Registering message watchers...");
+            foreach (var watcher in watchers)
             {
-                Log.Write("Setup", "Registering message watchers...");
-                var watchers = serviceProvider.GetServices<IMessageWatcher>();
-                foreach (var watcher in watchers)
+                try
                 {
-                    try
-                    {
-                        DiscordClient.MessageReceived += watcher.Receive;
-                        if (watcher is IAsyncInitialize asyncInitialize)
-                            await asyncInitialize.InitializeAsync();
+                    discordClient.MessageReceived += watcher.Receive;
+                    if (watcher is IAsyncInitialize asyncInitialize)
+                        await asyncInitialize.InitializeAsync();
 
-                        Log.Write("Setup", $"Registered message watcher '{watcher.GetType().Name}'.");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Exception(e);
-                        Log.Write("Setup", $"Failed to register message watcher '{watcher.GetType().Name}'.");
-                        throw;
-                    }
+                    Log.Write("Setup", $"Registered message watcher '{watcher.GetType().Name}'.");
                 }
-
-                _messageWatchersRegistered = true;
-                Log.Write("Setup", "Message watchers successfully registered.");
+                catch (Exception e)
+                {
+                    Log.Exception(e);
+                    Log.Write("Setup", $"Failed to register message watcher '{watcher.GetType().Name}'.");
+                    throw;
+                }
             }
+
+            Log.Write("Setup", "Message watchers successfully registered.");
         }
 
-        private async Task RegisterReactionWatchers(IServiceProvider serviceProvider)
+        private async Task RegisterReactionWatchers(IEnumerable<IReactionWatcher> watchers, DiscordSocketClient discordClient)
         {
-            if (!_reactionWatchersRegistered)
+            Log.Write("Setup", "Registering reaction watchers...");
+            foreach (var watcher in watchers)
             {
-                Log.Write("Setup", "Registering reaction watchers...");
-                var watchers = serviceProvider.GetServices<IReactionWatcher>();
-                foreach (var watcher in watchers)
+                try
                 {
-                    try
-                    {
-                        DiscordClient.ReactionAdded += watcher.ReactionAdded;
-                        DiscordClient.ReactionRemoved += watcher.ReactionRemoved;
+                    discordClient.ReactionAdded += watcher.ReactionAdded;
+                    discordClient.ReactionRemoved += watcher.ReactionRemoved;
 
-                        if (watcher is IAsyncInitialize asyncInitialize)
-                            await asyncInitialize.InitializeAsync();
-                        Log.Write("Setup", $"Registered reaction watcher '{watcher.GetType().Name}'.");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Exception(e);
-                        Log.Write("Setup", $"Failed to register reaction watcher '{watcher.GetType().Name}'.");
-                        throw;
-                    }
+                    if (watcher is IAsyncInitialize asyncInitialize)
+                        await asyncInitialize.InitializeAsync();
+                    Log.Write("Setup", $"Registered reaction watcher '{watcher.GetType().Name}'.");
                 }
-
-                _reactionWatchersRegistered = true;
-                Log.Write("Setup", "Reaction watchers successfully registered.");
+                catch (Exception e)
+                {
+                    Log.Exception(e);
+                    Log.Write("Setup", $"Failed to register reaction watcher '{watcher.GetType().Name}'.");
+                    throw;
+                }
             }
+
+            Log.Write("Setup", "Reaction watchers successfully registered.");
         }
 
-        private async Task RegisterInteractionWatchers(IServiceProvider serviceProvider)
+        private async Task RegisterInteractionWatchers(IEnumerable<IInteractionWatcher> watchers, DiscordSocketClient discordClient)
         {
-            if (!_interactionWatchersRegistered)
+            Log.Write("Setup", "Registering interaction watchers...");
+            foreach (var watcher in watchers)
             {
-                Log.Write("Setup", "Registering interaction watchers...");
-                var watchers = serviceProvider.GetServices<IInteractionWatcher>();
-                foreach (var watcher in watchers)
+                try
                 {
-                    try
-                    {
-                        DiscordClient.InteractionCreated += watcher.HandleInteraction;
+                    discordClient.InteractionCreated += watcher.HandleInteraction;
 
-                        if (watcher is IAsyncInitialize asyncInitialize)
-                            await asyncInitialize.InitializeAsync();
+                    if (watcher is IAsyncInitialize asyncInitialize)
+                        await asyncInitialize.InitializeAsync();
 
-                        Log.Write("Setup", $"Registered interaction watcher '{watcher.GetType().Name}'.");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Exception(e);
-                        Log.Write("Setup", $"Failed to register interaction watcher '{watcher.GetType().Name}'.");
-                        throw;
-                    }
+                    Log.Write("Setup", $"Registered interaction watcher '{watcher.GetType().Name}'.");
                 }
-
-                _interactionWatchersRegistered = true;
-                Log.Write("Setup", "Interaction watchers successfully registered.");
+                catch (Exception e)
+                {
+                    Log.Exception(e);
+                    Log.Write("Setup", $"Failed to register interaction watcher '{watcher.GetType().Name}'.");
+                    throw;
+                }
             }
+
+            Log.Write("Setup", "Interaction watchers successfully registered.");
         }
     }
 }
