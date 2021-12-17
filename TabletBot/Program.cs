@@ -2,6 +2,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Octokit;
@@ -62,20 +63,15 @@ namespace TabletBot
             if (!Settings.Current.RunAsUnit)
                 IO.WriteMessageHeader();
 
-            DiscordClient = new DiscordSocketClient(
-                new DiscordSocketConfig
-                {
-                    AlwaysDownloadUsers = true
-                }
-            );
+            var config = new DiscordSocketConfig();
+            DiscordClient = new DiscordSocketClient(config);
             var gitHubClient = await AuthenticateGitHub(Settings.Current.GitHubToken);
 
             var serviceCollection = BotServiceCollection.Build(DiscordClient, gitHubClient);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             Bot = serviceProvider.GetRequiredService<Bot>();
-
-            await Bot.Setup();
+            await Bot.Login(Settings.Current.DiscordBotToken);
 
             while (Bot.IsRunning)
             {

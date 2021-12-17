@@ -4,14 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Common;
-using TabletBot.Common.Store;
 using TabletBot.Discord.Watchers;
 
 namespace TabletBot.Discord
 {
-    public partial class Bot
+    public class Bot
     {
         public Bot(
             DiscordSocketClient discordSocketClient,
@@ -36,17 +34,9 @@ namespace TabletBot.Discord
         private readonly IEnumerable<IReactionWatcher> _reactionWatchers;
         private readonly IEnumerable<IInteractionWatcher> _interactionWatchers;
 
-        public async Task Setup()
-        {
-            if (Settings.Current.DiscordBotToken != null)
-            {
-                await Login(Settings.Current.DiscordBotToken);
-            }
-        }
-
         public bool IsRunning { set; get; }
 
-        private async Task Login(string token)
+        public async Task Login(string token)
         {
             if (token != null)
             {
