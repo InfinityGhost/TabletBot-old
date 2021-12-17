@@ -4,18 +4,16 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using TabletBot.Common;
 using TabletBot.Common.Store;
-using TabletBot.Discord.Watchers;
 
 namespace TabletBot.Discord
 {
     public partial class Bot
     {
-        public Bot()
+        private Bot()
         {
-            DiscordClient.Log += (msg) => LogExtensions.WriteAsync(msg);
+            DiscordClient.Log += LogExtensions.WriteAsync;
             DiscordClient.MessageReceived += MessageReceived;
             DiscordClient.MessageDeleted += HandleMessageDeleted;
             DiscordClient.Ready += Ready;
@@ -30,6 +28,7 @@ namespace TabletBot.Discord
         }
 
         public static Bot Current { set; get; } = new Bot();
+
         public DiscordSocketClient DiscordClient { set; get; } = new DiscordSocketClient(
             new DiscordSocketConfig
             {
@@ -84,7 +83,7 @@ namespace TabletBot.Discord
             await Task.WhenAll(
                 RegisterMessageWatchers(serviceProvider),
                 RegisterReactionWatchers(serviceProvider),
-                RegisterSlashCommands(serviceProvider)
+                RegisterInteractionWatchers(serviceProvider)
             );
         }
 

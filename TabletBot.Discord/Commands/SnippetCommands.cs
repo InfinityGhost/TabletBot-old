@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,11 +7,20 @@ using Discord.Commands;
 using TabletBot.Common;
 using TabletBot.Common.Store;
 using TabletBot.Discord.Embeds;
+using TabletBot.Discord.SlashCommands;
+using TabletBot.Discord.Watchers;
 
 namespace TabletBot.Discord.Commands
 {
     public class SnippetCommands : CommandModule
     {
+        public SnippetCommands(IEnumerable<SlashCommandModule> slashCommands)
+        {
+            _snippetSlashCommands = slashCommands.FirstOfType<SlashCommandModule, SnippetSlashCommands>();
+        }
+
+        private readonly SnippetSlashCommands _snippetSlashCommands;
+
         private const string SHOW_SNIPPET = "snippet";
         private const string LIST_SNIPPETS = "list-snippets";
         private const string SET_SNIPPET = "set-snippet";
@@ -25,7 +32,7 @@ namespace TabletBot.Discord.Commands
         [Command(SHOW_SNIPPET, RunMode = RunMode.Async), Name("Show snippet")]
         public async Task ShowSnippet(string prefix)
         {
-            await Context.Message?.DeleteAsync();
+            await Context.Message!.DeleteAsync();
 
             if (SnippetEmbeds.TryGetSnippetEmbed(prefix, out var embed))
             {
@@ -77,7 +84,7 @@ namespace TabletBot.Discord.Commands
         [Command(SET_SNIPPET, RunMode = RunMode.Async), Name("Create snippet"), RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task SetSnippet(string prefix, string title, [Remainder] string content)
         {
-            await Context.Message?.DeleteAsync();
+            await Context.Message!.DeleteAsync();
 
             if (Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore store)
             {
@@ -92,14 +99,14 @@ namespace TabletBot.Discord.Commands
                 Snippets.Add(store);
             }
             await Settings.Current.Overwrite();
-            await Bot.Current.UpdateSlashCommands();
+            _snippetSlashCommands.OnUpdate();
             await ReplyAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
         }
 
         [Command(REMOVE_SNIPPET, RunMode = RunMode.Async), Name("Delete snippet"), RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task RemoveSnippet(string prefix)
         {
-            await Context.Message?.DeleteAsync();
+            await Context.Message!.DeleteAsync();
 
             EmbedBuilder result;
 
@@ -120,14 +127,14 @@ namespace TabletBot.Discord.Commands
                     }
                 };
                 await Settings.Current.Overwrite();
-                await Bot.Current.UpdateSlashCommands();
+                _snippetSlashCommands.OnUpdate();
             }
             else
             {
                 result = new EmbedBuilder
                 {
                     Color = Color.Red,
-                    Title = "Failed to delete snipppet",
+                    Title = "Failed to delete snippet",
                     Description = "The snippet was not found."
                 };
             }
@@ -139,7 +146,7 @@ namespace TabletBot.Discord.Commands
         [Command(EXPORT_SNIPPET, RunMode = RunMode.Async), Name("Export snippet")]
         public async Task ExportSnippet(string prefix)
         {
-            await Context.Message?.DeleteAsync();
+            await Context.Message!.DeleteAsync();
 
             if (Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore snippet)
             {

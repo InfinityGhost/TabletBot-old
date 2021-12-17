@@ -29,6 +29,8 @@ namespace TabletBot.Discord
                 .AddMessageWatcher<SpamMessageWatcher>()
                 // Reaction watchers
                 .AddReactionWatcher<RoleReactionWatcher>()
+                // Interaction watchers
+                .AddInteractionWatcher<SlashCommandInteractionWatcher>()
                 // Commands
                 .AddCommandModule<ModerationCommands>()
                 .AddCommandModule<GitHubCommands>()

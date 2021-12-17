@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Discord.SlashCommands;
@@ -18,16 +20,28 @@ namespace TabletBot.Discord.Watchers
             return serviceCollection.AddSingleton<IReactionWatcher, T>();
         }
 
+        public static IServiceCollection AddInteractionWatcher<T>(this IServiceCollection serviceCollection)
+            where T : class, IInteractionWatcher
+        {
+            return serviceCollection.AddSingleton<IInteractionWatcher, T>();
+        }
+
         public static IServiceCollection AddCommandModule<T>(this IServiceCollection serviceCollection)
             where T : ModuleBase<ICommandContext>
         {
-            return serviceCollection.AddScoped<ModuleBase<ICommandContext>, T>();
+            return serviceCollection.AddTransient<ModuleBase<ICommandContext>, T>();
         }
 
         public static IServiceCollection AddSlashCommandModule<T>(this IServiceCollection serviceCollection)
             where T : SlashCommandModule
         {
-            return serviceCollection.AddScoped<SlashCommandModule, T>();
+            return serviceCollection.AddSingleton<SlashCommandModule, T>();
+        }
+
+        public static T FirstOfType<TSource, T>(this IEnumerable<TSource> enumerable)
+            where T : class, TSource
+        {
+            return enumerable.First(i => i is T) as T;
         }
     }
 }

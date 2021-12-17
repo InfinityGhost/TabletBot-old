@@ -10,7 +10,7 @@ using TabletBot.Common;
 
 namespace TabletBot.Discord.Watchers.Commands
 {
-    public class CommandMessageWatcher : IMessageWatcher
+    public class CommandMessageWatcher : IMessageWatcher, IAsyncInitialize
     {
         public CommandMessageWatcher(
             DiscordSocketClient discordClient,
@@ -37,8 +37,6 @@ namespace TabletBot.Discord.Watchers.Commands
 
         public async Task Receive(IMessage message)
         {
-            await RegisterCommands();
-
             if (message.Content.StartsWith(Settings.Current.CommandPrefix))
             {
                 var context = new CommandContext(_discordClient, message as IUserMessage);
@@ -48,7 +46,7 @@ namespace TabletBot.Discord.Watchers.Commands
 
         public Task Deleted(IMessage message) => Task.CompletedTask;
 
-        private async Task RegisterCommands()
+        public async Task InitializeAsync()
         {
             if (_registered)
                 return;
@@ -61,7 +59,7 @@ namespace TabletBot.Discord.Watchers.Commands
 
             _commandService.CommandExecuted += CommandExecuted;
             _registered = true;
-            await Log.WriteAsync("Setup", "All message commands registered.", LogLevel.Debug);
+            await Log.WriteAsync("Setup", "Message commands registered.", LogLevel.Debug);
         }
 
         private async Task CommandExecuted(Optional<CommandInfo> cmdInfo, ICommandContext context, IResult result)
@@ -70,8 +68,7 @@ namespace TabletBot.Discord.Watchers.Commands
             {
                 IMessage msg = result.Error switch
                 {
-                    CommandError.BadArgCount => await context.Channel.SendMessageAsync(
-                        "Error: incorrect argument count."),
+                    CommandError.BadArgCount => await context.Channel.SendMessageAsync("Error: incorrect argument count."),
                     _ => await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}")
                 };
 
