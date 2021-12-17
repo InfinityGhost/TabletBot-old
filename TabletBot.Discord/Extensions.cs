@@ -47,7 +47,7 @@ namespace TabletBot.Discord.Watchers
 
         public static IEnumerable<Type> OfType<T>(this IEnumerable<Type> types)
         {
-            return types.Where(t => t.IsAssignableFrom(typeof(T)));
+            return types.Where(t => t.IsAssignableTo(typeof(T)));
         }
     }
 }
