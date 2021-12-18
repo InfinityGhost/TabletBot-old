@@ -14,7 +14,7 @@ namespace TabletBot.Discord.Watchers.Spam
             {
                 var guildUser = message.Author as IGuildUser;
                 await guildUser.BanAsync(1, "Automated ban for spam.");
-                Log.Write("SpamDetect", $"User {guildUser.Username}#{guildUser.Discriminator} ({guildUser.Id}) was banned for spamming.");
+                Log.Write("SpamDetect", $"User {message.Author.Username}#{message.Author.Discriminator} ({message.Author.Id}) was banned for spamming.");
             }
         }
 
