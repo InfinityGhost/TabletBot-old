@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -82,17 +83,25 @@ namespace TabletBot.Discord.Watchers.Commands
 
         private async Task UpdateModule(SlashCommandModule module)
         {
-            module.BuildCommandHandlers();
+            var applicationCommands = await _client.Rest.GetGuildApplicationCommands(Settings.Current.GuildID);
+            var handlers = module.BuildCommandHandlers();
 
-            foreach (var command in await _client.Rest.GetGuildApplicationCommands(Settings.Current.GuildID))
-                await command.DeleteAsync();
+            var commandsToUpdate = from handler in handlers
+                let command = applicationCommands.FirstOrDefault(c => c.Name == handler.Name)
+                where command != null
+                select (handler, command);
 
+            Log.Write("SlashCmd", $"Updating slash commands...");
             var moderatorCommands = new List<RestGuildCommand>();
-            foreach (var command in module.CommandHandlers)
+            foreach (var updateable in commandsToUpdate)
             {
-                var guildCommand = await _client.Rest.CreateGuildCommand(command.Build(), Settings.Current.GuildID);
+                await updateable.command.DeleteAsync();
+
+                var guildCommand = await _client.Rest.CreateGuildCommand(updateable.handler.Build(), Settings.Current.GuildID);
                 if (guildCommand.IsDefaultPermission == false)
                     moderatorCommands.Add(guildCommand);
+
+                Log.Write("SlashCmd", $"Successfully updated slash command {updateable.handler.Name}.");
             }
 
             await ApplyCommandPermissions(_client, moderatorCommands);

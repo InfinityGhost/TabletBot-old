@@ -27,9 +27,9 @@ namespace TabletBot.Discord.SlashCommands
 
         protected abstract IEnumerable<SlashCommand> GetSlashCommands();
 
-        public void BuildCommandHandlers()
+        public IList<SlashCommand> BuildCommandHandlers()
         {
-            CommandHandlers = new List<SlashCommand>(GetSlashCommands());
+            return CommandHandlers = new List<SlashCommand>(GetSlashCommands());
         }
     }
 }
