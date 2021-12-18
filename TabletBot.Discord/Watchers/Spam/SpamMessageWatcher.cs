@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Discord;
+using TabletBot.Common;
 
 #nullable enable
 
@@ -12,7 +13,8 @@ namespace TabletBot.Discord.Watchers.Spam
             if (_spamMessageList.Check(message))
             {
                 var guildUser = message.Author as IGuildUser;
-                await guildUser.BanAsync();
+                await guildUser.BanAsync(1, "Automated ban for spam.");
+                Log.Write("SpamDetect", $"User {guildUser.Username}#{guildUser.Discriminator} ({guildUser.Id}) was banned for spamming.");
             }
         }
 

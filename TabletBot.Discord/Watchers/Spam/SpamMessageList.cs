@@ -19,13 +19,13 @@ namespace TabletBot.Discord.Watchers.Spam
             if (GetLastUserMessage(message.Author) is SpamWatcherItem item)
             {
                 var since = item.Message.Timestamp - message.Timestamp;
-                if (item.Message.CleanContent == message.CleanContent && since > TimeSpan.FromSeconds(30))
+                if (item.Message.CleanContent == message.CleanContent && since < TimeSpan.FromSeconds(30))
                 {
                     item.Count++;
                 }
                 else
                 {
-                    item.Count = 0;
+                    item.Count = 1;
                     item.Message = message;
                 }
                 return item.Count >= Settings.Current.SpamThreshold;
@@ -40,15 +40,9 @@ namespace TabletBot.Discord.Watchers.Spam
             return false;
         }
 
-        private bool ContainsUrl(string messageContent)
-        {
-            var subStrings = messageContent.Split(' ');
-            return subStrings.Any(m => m.Contains("http://") || m.Contains("https://"));
-        }
-
         private SpamWatcherItem? GetLastUserMessage(IUser user)
         {
-            return this.FirstOrDefault(m => m.Message.Author.Discriminator == user.Discriminator);
+            return this.FirstOrDefault(m => m.Message.Author.Id == user.Id);
         }
     }
 }
