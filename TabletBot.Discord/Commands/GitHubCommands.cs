@@ -6,15 +6,23 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Octokit;
 using TabletBot.Discord.Embeds;
-using TabletBot.GitHub;
 
 namespace TabletBot.Discord.Commands
 {
     public class GitHubCommands : CommandModule
     {
-        private GitHubAPI GitHub => TabletBot.GitHub.GitHubAPI.Current;
+        private GitHubClient _gitHubClient;
+        private readonly DiscordSocketClient _discordSocketClient;
+
+        public GitHubCommands(GitHubClient gitHubClient, DiscordSocketClient discordSocketClient)
+        {
+            _gitHubClient = gitHubClient;
+            _discordSocketClient = discordSocketClient;
+        }
+
         private const string RepositoryOwner = "InfinityGhost";
         private const string RepositoryName = "OpenTabletDriver";
         private static readonly Regex ArtifactRegex = new Regex("<.+?href=\"/InfinityGhost/OpenTabletDriver/suites/(?<Suite>.+?)/artifacts/(?<Artifact>.+?)\">(?<Name>.+?)</.+?>");
@@ -24,15 +32,15 @@ namespace TabletBot.Discord.Commands
         public async Task GetRepositoryOverview()
         {
             var message = await ReplyAsync($"Getting overview for {RepositoryOwner}/{RepositoryName}...");
-            var repo = await GitHub.Repository.Get(RepositoryOwner, RepositoryName);
+            var repo = await _gitHubClient.Repository.Get(RepositoryOwner, RepositoryName);
 
             IEnumerable<Issue> issues =
-                from issue in await GitHub.Issue.GetAllForRepository(repo.Id)
+                from issue in await _gitHubClient.Issue.GetAllForRepository(repo.Id)
                 where issue.State == ItemState.Open
                 select issue;
 
             IEnumerable<PullRequest> prs =
-                from pr in await GitHub.PullRequest.GetAllForRepository(repo.Id)
+                from pr in await _gitHubClient.PullRequest.GetAllForRepository(repo.Id)
                 where pr.State == ItemState.Open
                 select pr;
 
@@ -41,7 +49,7 @@ namespace TabletBot.Discord.Commands
                 Title = $"{RepositoryOwner}/{RepositoryName}",
                 Timestamp = repo.PushedAt,
                 Url = repo.HtmlUrl,
-                ThumbnailUrl = Bot.Current.DiscordClient.CurrentUser.GetAvatarUrl(),
+                ThumbnailUrl = _discordSocketClient.CurrentUser.GetAvatarUrl(),
                 Footer = new EmbedFooterBuilder
                 {
                     Text = $"Last pushed {repo.PushedAt}",
@@ -58,7 +66,7 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching pull request #{id}");
-            var pr = await GitHub.PullRequest.Get(RepositoryOwner, RepositoryName, id);
+            var pr = await _gitHubClient.PullRequest.Get(RepositoryOwner, RepositoryName, id);
             var embed = GitHubEmbeds.GetPullRequestEmbed(pr);
             await message.Update(embed);
         }
@@ -68,7 +76,7 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message.DeleteAsync();
             var message = await ReplyAsync($"Fetching issue #{id}");
-            var issue = await GitHub.Issue.Get(RepositoryOwner, RepositoryName, id);
+            var issue = await _gitHubClient.Issue.Get(RepositoryOwner, RepositoryName, id);
             var embed = GitHubEmbeds.GetIssueEmbed(issue);
             await message.Update(embed);
         }
@@ -87,7 +95,7 @@ namespace TabletBot.Discord.Commands
             Match commitMatch = await Task<Match>.Run(() => CommitRegex.Match(html));
             string sha = commitMatch.Groups["SHA"].Value;
             string hash = string.Concat(sha.Take(7));
-            var commit = await GitHub.Git.Commit.Get(RepositoryOwner, RepositoryName, sha);
+            var commit = await _gitHubClient.Git.Commit.Get(RepositoryOwner, RepositoryName, sha);
             var title = commit.Message.Split(Environment.NewLine).First();
             
             var embed = new EmbedBuilder

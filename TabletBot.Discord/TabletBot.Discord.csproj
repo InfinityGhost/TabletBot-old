@@ -7,11 +7,11 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net.Labs" Version="3.4.9" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Octokit" Version="0.50.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TabletBot.Common\TabletBot.Common.csproj" />
-    <ProjectReference Include="..\TabletBot.GitHub\TabletBot.GitHub.csproj" />
   </ItemGroup>
 
 </Project>

@@ -29,10 +29,11 @@ namespace TabletBot.Discord
 
         public static bool IsTracked(
             this SocketReaction reaction,
+            DiscordSocketClient client,
             out RoleManagementMessageStore reactionRole
         )
         {
-            if (reaction.UserId == Bot.Current.DiscordClient.CurrentUser.Id)
+            if (reaction.UserId == client.CurrentUser.Id)
             {
                 reactionRole = default;
                 return false;

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using TabletBot.Common;
 using TabletBot.Common.Store;
 
@@ -9,6 +10,12 @@ namespace TabletBot.Discord.Commands
 {
     public class RoleCommands : CommandModule
     {
+        private readonly DiscordSocketClient _discordSocketClient;
+
+        public RoleCommands(DiscordSocketClient discordSocketClient)
+        {
+            _discordSocketClient = discordSocketClient;
+        }
 
         [Command("add-react-role", RunMode = RunMode.Async), Name("Add reactive role")]
         [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
@@ -45,7 +52,7 @@ namespace TabletBot.Discord.Commands
             {
                 Settings.Current.ReactiveRoles.Remove(reactiveRole);
                 var emoji = reactiveRole.EmoteName.GetEmote();
-                await message.RemoveReactionAsync(emoji, Bot.Current.DiscordClient.CurrentUser);
+                await message.RemoveReactionAsync(emoji, _discordSocketClient.CurrentUser);
                 await Settings.Current.Overwrite();
                 
                 var reply = await ReplyAsync($"Reactive role removed from: {reactiveRole.EmoteName}", messageReference: messageRef);

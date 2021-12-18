@@ -26,7 +26,7 @@ namespace TabletBot
         [Command, Alias("Exit")]
         public static void Stop(params string[] args)
         {
-            Bot.Current.IsRunning = false;
+            Bot.IsRunning = false;
         }
 
         [Command("Channel ID", "Message"), Alias("Message")]
@@ -34,7 +34,7 @@ namespace TabletBot
         {
             ulong id = Convert.ToUInt64(args[0]);
             string message = string.Join(' ', args[1..^0]);
-            await Bot.Current.Send(id, message);
+            await Bot.Send(id, message);
         }
 
         [Command]
