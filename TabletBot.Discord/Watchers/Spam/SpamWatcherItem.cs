@@ -1,6 +1,6 @@
 using Discord;
 
-namespace TabletBot.Discord.Watchers
+namespace TabletBot.Discord.Watchers.Spam
 {
     public class SpamWatcherItem
     {
