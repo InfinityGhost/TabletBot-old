@@ -24,7 +24,7 @@ namespace TabletBot.Discord.Watchers.Spam
 
             bool withinTime = lastMessage.Timestamp - message.Timestamp < TimeSpan.FromSeconds(30);
             bool contentMatches = message.CleanContent != null && message.CleanContent == lastMessage.CleanContent;
-            bool containsUrl = ContainsUrl(message.CleanContent);
+            bool containsUrl = ContainsUrl(message);
 
             if (withinTime && contentMatches && containsUrl)
             {
@@ -35,6 +35,11 @@ namespace TabletBot.Discord.Watchers.Spam
             Clear();
             Add(message);
             return false;
+        }
+
+        private bool ContainsUrl(IMessage message)
+        {
+            return message.Embeds.Any(embed => embed.Type == EmbedType.Link) || ContainsUrl(message.CleanContent);
         }
 
         private bool ContainsUrl(string? message)
