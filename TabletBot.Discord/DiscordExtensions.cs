@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -24,8 +23,6 @@ namespace TabletBot.Discord
                 Log.Exception(ex);
             }
         }
-
-        public static void DeleteAllDelayed(this IList<IMessage> messages) => DeleteAllDelayed(messages);
 
         public static bool IsTracked(
             this SocketReaction reaction,

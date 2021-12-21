@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Discord;
 using TabletBot.Common;
 
@@ -9,40 +8,46 @@ using TabletBot.Common;
 
 namespace TabletBot.Discord.Watchers.Spam
 {
-    public class SpamMessageList : List<SpamWatcherItem>
+    public class SpamMessageList : List<IMessage>
     {
         public bool Check(IMessage message)
         {
             if (message.Author.IsBot || message.Channel is not IGuildChannel)
                 return false;
 
-            if (GetLastUserMessage(message.Author) is SpamWatcherItem item)
+            var lastMessage = this.LastOrDefault();
+            if (lastMessage == null)
             {
-                var since = item.Message.Timestamp - message.Timestamp;
-                if (item.Message.CleanContent == message.CleanContent && since < TimeSpan.FromSeconds(30))
-                {
-                    item.Count++;
-                }
-                else
-                {
-                    item.Count = 1;
-                    item.Message = message;
-                }
-                return item.Count >= Settings.Current.SpamThreshold;
+                Add(message);
+                return false;
             }
 
-            var newItem = new SpamWatcherItem
-            {
-                Message = message
-            };
-            Add(newItem);
+            bool withinTime = lastMessage.Timestamp - message.Timestamp < TimeSpan.FromSeconds(30);
+            bool contentMatches = message.CleanContent != null && message.CleanContent == lastMessage.CleanContent;
+            bool containsUrl = ContainsUrl(message);
 
+            if (withinTime && contentMatches && containsUrl)
+            {
+                Add(message);
+                return this.GroupBy(msg => msg.Channel).Count() > Settings.Current.SpamThreshold;
+            }
+
+            Clear();
+            Add(message);
             return false;
         }
 
-        private SpamWatcherItem? GetLastUserMessage(IUser user)
+        private bool ContainsUrl(IMessage message)
         {
-            return this.FirstOrDefault(m => m.Message.Author.Id == user.Id);
+            return message.Embeds.Any(embed => embed.Type == EmbedType.Link) || ContainsUrl(message.CleanContent);
+        }
+
+        private bool ContainsUrl(string? message)
+        {
+            if (message == null)
+                return false;
+
+            return message.Contains("http://") || message.Contains("https://");
         }
     }
 }
