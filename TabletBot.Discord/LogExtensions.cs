@@ -11,7 +11,7 @@ namespace TabletBot.Discord
         {
             await Log.WriteAsync("Message", string.Format(
                 "#{1}/{2}#{3}: {0}",
-                message.Content,
+                message.CleanContent,
                 message.Channel.Name,
                 message.Author.Username,
                 message.Author.Discriminator
