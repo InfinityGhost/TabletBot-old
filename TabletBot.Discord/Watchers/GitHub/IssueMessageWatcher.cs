@@ -26,6 +26,9 @@ namespace TabletBot.Discord.Watchers.GitHub
 
         public async Task Receive(IMessage message)
         {
+            if (message.Author.IsBot)
+                return;
+
             if (TryGetIssueRefNumbers(message.Content, out var refs))
             {
                 uint refNum = 0;

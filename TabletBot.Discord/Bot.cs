@@ -81,7 +81,8 @@ namespace TabletBot.Discord
 
         private async Task MessageReceived(IMessage message)
         {
-            await LogExtensions.WriteAsync(message).ConfigureAwait(false);
+            if (message.Author.Id == _discordSocketClient.CurrentUser.Id || !message.Author.IsBot)
+                await LogExtensions.WriteAsync(message).ConfigureAwait(false);
         }
 
         private async Task RegisterWatchers(IEnumerable<IWatcher> watchers, DiscordSocketClient discordClient)
