@@ -31,9 +31,8 @@ namespace TabletBot.Discord.Commands
             });
         }
 
-        public static async void DeleteDelayed(this IMessage message)
+        public static async void DeleteDelayed(this IMessage message, int delay)
         {
-            var delay = Settings.Current.DeleteDelay;
             if (delay > 0)
             {
                 await Task.Delay(delay);
@@ -41,7 +40,7 @@ namespace TabletBot.Discord.Commands
             }
         }
 
-        public static void EmbedParameters(this CommandInfo command, ref EmbedBuilder embed)
+        public static void EmbedParameters(this CommandInfo command, ref EmbedBuilder embed, Settings settings)
         {
             var field = new EmbedFieldBuilder
             {
@@ -56,7 +55,7 @@ namespace TabletBot.Discord.Commands
                 select string.Format((parameter.IsOptional ? "[{0}]" : "<{0}>"), parameter.Name);
 
             field.Value += string.Format("**Syntax**: `{0}{1}{2}`",
-                Settings.Current.CommandPrefix,
+                settings.CommandPrefix,
                 command.Aliases[0],
                 (' ' + string.Join(" ", parameters)).TrimEnd());
 

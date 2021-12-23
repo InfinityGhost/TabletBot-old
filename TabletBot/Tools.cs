@@ -15,7 +15,7 @@ namespace TabletBot
             }
             else if (Program.Bot != null)
             {
-                var role = Program.DiscordClient.GetGuild(Settings.Current.GuildID).Roles.First(r => r.Name.Contains(args[0]));
+                var role = Program.DiscordClient!.GetGuild(Program.Settings.GuildID).Roles.First(r => r.Name.Contains(args![0]));
                 name = role.Name;
                 roleId = role.Id;
                 return true;

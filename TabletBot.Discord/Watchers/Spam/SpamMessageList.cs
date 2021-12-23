@@ -10,6 +10,13 @@ namespace TabletBot.Discord.Watchers.Spam
 {
     public class SpamMessageList : List<IMessage>
     {
+        private readonly uint _spamThreshold;
+
+        public SpamMessageList(uint spamThreshold)
+        {
+            _spamThreshold = spamThreshold;
+        }
+
         public bool Check(IMessage message)
         {
             if (message.Author.IsBot || message.Channel is not IGuildChannel)
@@ -29,7 +36,7 @@ namespace TabletBot.Discord.Watchers.Spam
             if (withinTime && contentMatches && containsUrl)
             {
                 Add(message);
-                return this.GroupBy(msg => msg.Channel).Count() > Settings.Current.SpamThreshold;
+                return this.GroupBy(msg => msg.Channel).Count() > _spamThreshold;
             }
 
             Clear();

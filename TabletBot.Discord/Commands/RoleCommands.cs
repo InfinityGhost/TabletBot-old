@@ -10,10 +10,12 @@ namespace TabletBot.Discord.Commands
 {
     public class RoleCommands : CommandModule
     {
+        private readonly Settings _settings;
         private readonly DiscordSocketClient _discordSocketClient;
 
-        public RoleCommands(DiscordSocketClient discordSocketClient)
+        public RoleCommands(Settings settings, DiscordSocketClient discordSocketClient)
         {
+            _settings = settings;
             _discordSocketClient = discordSocketClient;
         }
 
@@ -21,24 +23,18 @@ namespace TabletBot.Discord.Commands
         [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
         public async Task AddReactiveRole(IRole role, string emote)
         {
-            var message = Context.Message.ReferencedMessage;
+            var message = Context.Message.ReferencedMessage!;
             var messageRef = new MessageReference(message.Id, message.Channel.Id);
-            if (message != null)
-            {
-                var emoji = emote.GetEmote();
-                await message.AddReactionAsync(emoji);
-                var reactionRole = new RoleManagementMessageStore(message.Id, role.Id, emote);
-                Settings.Current.ReactiveRoles.Add(reactionRole);
-                await Settings.Current.Overwrite();
 
-                var reply = await ReplyAsync($"Reactive role added: {reactionRole.EmoteName}", messageReference: messageRef);
-                reply.DeleteDelayed();
-            }
-            else
-            {
-                var reply = await ReplyAsync("Error: No message has been referenced.", messageReference: messageRef);
-                reply.DeleteDelayed();
-            }
+            var emoji = emote.GetEmote();
+            await message.AddReactionAsync(emoji);
+            var reactionRole = new RoleManagementMessageStore(message.Id, role.Id, emote);
+            _settings.ReactiveRoles.Add(reactionRole);
+            await _settings.Overwrite();
+
+            var reply = await ReplyAsync($"Reactive role added: {reactionRole.EmoteName}",
+                messageReference: messageRef);
+            reply.DeleteDelayed(_settings.DeleteDelay);
             await Context.Message.DeleteAsync();
         }
 
@@ -46,22 +42,22 @@ namespace TabletBot.Discord.Commands
         [RequireUserPermission(GuildPermission.ManageRoles), RequireBotPermission(GuildPermission.ManageRoles | GuildPermission.ManageGuild)]
         public async Task RemoveReactiveRole(IRole role)
         {
-            var message = Context.Message.ReferencedMessage;
+            var message = Context.Message.ReferencedMessage!;
             var messageRef = new MessageReference(message.Id, message.Channel.Id);
-            if (Settings.Current.ReactiveRoles.FirstOrDefault(r => r.RoleId == role.Id) is RoleManagementMessageStore reactiveRole)
+            if (_settings.ReactiveRoles.FirstOrDefault(r => r.RoleId == role.Id) is RoleManagementMessageStore reactiveRole)
             {
-                Settings.Current.ReactiveRoles.Remove(reactiveRole);
+                _settings.ReactiveRoles.Remove(reactiveRole);
                 var emoji = reactiveRole.EmoteName.GetEmote();
                 await message.RemoveReactionAsync(emoji, _discordSocketClient.CurrentUser);
-                await Settings.Current.Overwrite();
+                await _settings.Overwrite();
                 
                 var reply = await ReplyAsync($"Reactive role removed from: {reactiveRole.EmoteName}", messageReference: messageRef);
-                reply.DeleteDelayed();
+                reply.DeleteDelayed(_settings.DeleteDelay);
             }
             else
             {
                 var reply = await ReplyAsync($"{role.Name} is not assigned as reactive to the referenced message.");
-                reply.DeleteDelayed();
+                reply.DeleteDelayed(_settings.DeleteDelay);
             }
             await Context.Message.DeleteAsync();
         }

@@ -8,9 +8,9 @@ namespace TabletBot.Discord.Embeds
 {
     public static class SnippetEmbeds
     {
-        public static bool TryGetSnippetEmbed(string prefix, out EmbedBuilder embed)
+        public static bool TryGetSnippetEmbed(Settings settings, string prefix, out EmbedBuilder embed)
         {
-            if (Settings.Current.Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore snippet)
+            if (settings.Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore snippet)
             {
                 embed = GetSnippetEmbed(snippet);
                 return true;

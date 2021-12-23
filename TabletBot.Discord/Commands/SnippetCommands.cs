@@ -14,11 +14,13 @@ namespace TabletBot.Discord.Commands
 {
     public class SnippetCommands : CommandModule
     {
-        public SnippetCommands(IEnumerable<SlashCommandModule> slashCommands)
+        public SnippetCommands(Settings settings, IEnumerable<SlashCommandModule> slashCommands)
         {
+            _settings = settings;
             _snippetSlashCommands = slashCommands.FirstOfType<SlashCommandModule, SnippetSlashCommands>();
         }
 
+        private readonly Settings _settings;
         private readonly SnippetSlashCommands _snippetSlashCommands;
 
         private const string SHOW_SNIPPET = "snippet";
@@ -27,21 +29,21 @@ namespace TabletBot.Discord.Commands
         private const string REMOVE_SNIPPET = "remove-snippet";
         private const string EXPORT_SNIPPET = "export-snippet";
 
-        private static IList<SnippetStore> Snippets => Settings.Current.Snippets;
+        private IList<SnippetStore> Snippets => _settings.Snippets;
 
         [Command(SHOW_SNIPPET, RunMode = RunMode.Async), Name("Show snippet")]
         public async Task ShowSnippet(string prefix)
         {
             await Context.Message!.DeleteAsync();
 
-            if (SnippetEmbeds.TryGetSnippetEmbed(prefix, out var embed))
+            if (SnippetEmbeds.TryGetSnippetEmbed(_settings, prefix, out var embed))
             {
                 await ReplyAsync(embed: embed.Build());
             }
             else
             {
                 var message = await ReplyAsync(embed: embed.Build(), messageReference: Context.Message.Reference);
-                message.DeleteDelayed();
+                message.DeleteDelayed(_settings.DeleteDelay);
             }
         }
 
@@ -77,7 +79,7 @@ namespace TabletBot.Discord.Commands
                 };
 
                 var message = await ReplyAsync(embed: embed.Build());
-                message.DeleteDelayed();
+                message.DeleteDelayed(_settings.DeleteDelay);
             }
         }
 
@@ -98,7 +100,7 @@ namespace TabletBot.Discord.Commands
                 store = new SnippetStore(prefix, title, content);
                 Snippets.Add(store);
             }
-            await Settings.Current.Overwrite();
+            await _settings.Overwrite();
             _snippetSlashCommands.OnUpdate();
             await ReplyAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
         }
@@ -126,7 +128,7 @@ namespace TabletBot.Discord.Commands
                         }
                     }
                 };
-                await Settings.Current.Overwrite();
+                await _settings.Overwrite();
                 _snippetSlashCommands.OnUpdate();
             }
             else
@@ -140,7 +142,7 @@ namespace TabletBot.Discord.Commands
             }
 
             var message = await ReplyAsync(embed: result.Build());
-            message.DeleteDelayed();
+            message.DeleteDelayed(_settings.DeleteDelay);
         }
 
         [Command(EXPORT_SNIPPET, RunMode = RunMode.Async), Name("Export snippet")]
@@ -167,7 +169,7 @@ namespace TabletBot.Discord.Commands
                 };
 
                 var message = await ReplyAsync(embed : result.Build());
-                message.DeleteDelayed();
+                message.DeleteDelayed(_settings.DeleteDelay);
             }
         }
     }

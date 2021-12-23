@@ -12,10 +12,12 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
 {
     public class RoleReactionWatcher : IReactionWatcher, IMessageWatcher
     {
-        private DiscordSocketClient _discordSocketClient;
+        private readonly Settings _settings;
+        private readonly DiscordSocketClient _discordSocketClient;
 
-        public RoleReactionWatcher(DiscordSocketClient discordSocketClient)
+        public RoleReactionWatcher(Settings settings, DiscordSocketClient discordSocketClient)
         {
+            _settings = settings;
             _discordSocketClient = discordSocketClient;
         }
 
@@ -35,7 +37,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
         {
             try
             {
-                if (reaction.IsTracked(_discordSocketClient, out var reactionRole))
+                if (IsTracked(reaction, _discordSocketClient, out var reactionRole))
                 {
                     var guild = await _discordSocketClient.Rest.GetGuildAsync(channel.GuildId);
                     var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
@@ -47,7 +49,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
             {
                 var systemChannel = await channel.Guild.GetSystemChannelAsync();
                 var reply = await ReplyException(systemChannel ?? channel, ex);
-                reply.DeleteDelayed();
+                reply.DeleteDelayed(_settings.DeleteDelay);
                 Log.Exception(ex);
             }
         }
@@ -56,7 +58,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
         {
             try
             {
-                if (reaction.IsTracked(_discordSocketClient, out var reactionRole))
+                if (IsTracked(reaction, _discordSocketClient, out var reactionRole))
                 {
                     var guild = await _discordSocketClient.Rest.GetGuildAsync(channel.GuildId);
                     var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole.RoleId);
@@ -68,7 +70,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
             {
                 var systemChannel = await channel.Guild.GetSystemChannelAsync();
                 var reply = await ReplyException(systemChannel ?? channel, ex);
-                reply.DeleteDelayed();
+                reply.DeleteDelayed(_settings.DeleteDelay);
                 Log.Exception(ex);
             }
         }
@@ -77,10 +79,30 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
 
         public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel)
         {
-            if (Settings.Current.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
-                Settings.Current.ReactiveRoles.Remove(roleStore);
+            if (_settings.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
+                _settings.ReactiveRoles.Remove(roleStore);
 
             return Task.CompletedTask;
+        }
+
+        public bool IsTracked(
+            SocketReaction reaction,
+            DiscordSocketClient client,
+            out RoleManagementMessageStore reactionRole
+        )
+        {
+            if (reaction.UserId == client.CurrentUser.Id)
+            {
+                reactionRole = default;
+                return false;
+            }
+
+            var query = from reactRole in _settings.ReactiveRoles
+                where reactRole.MessageId == reaction.MessageId
+                where reactRole.EmoteName == reaction.Emote.ToString()
+                select reactRole;
+            reactionRole = query.FirstOrDefault();
+            return reactionRole != null;
         }
     }
 }

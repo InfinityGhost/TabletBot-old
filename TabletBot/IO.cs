@@ -128,7 +128,7 @@ namespace TabletBot
 
         public static void WriteLogMessage(LogMessage message)
         {
-            switch (message, Settings.Current.RunAsUnit)
+            switch (message, Program.Settings.RunAsUnit)
             {
                 case (ExceptionLogMessage exceptionLogMessage, true):
                 {
@@ -191,7 +191,7 @@ namespace TabletBot
 
         private static void WriteBufferPrefix()
         {
-            if (!Settings.Current.RunAsUnit)
+            if (!Program.Settings.RunAsUnit)
                 Console.Out.Write(InputBufferText);
         }
 

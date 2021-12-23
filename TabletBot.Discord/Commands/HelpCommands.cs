@@ -4,23 +4,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using TabletBot.Common;
 
 namespace TabletBot.Discord.Commands
 {
     public class HelpCommands : CommandModule
     {
-        private readonly CommandService Commands;
-        private readonly IServiceProvider Services;
+        private readonly Settings _settings;
+        private readonly CommandService _commands;
+        private readonly IServiceProvider _services;
 
         private static readonly IList<string> ExcludedModules = new List<string>
         {
             nameof(ModerationCommands)
         };
 
-        public HelpCommands(CommandService commands, IServiceProvider services)
+        public HelpCommands(Settings settings, CommandService commands, IServiceProvider services)
         {
-            Commands = commands;
-            Services = services;
+            _settings = settings;
+            _commands = commands;
+            _services = services;
         }
 
         [Command("help", RunMode = RunMode.Async), Name("Help"), Summary("Lists all commands available.")]
@@ -30,7 +33,7 @@ namespace TabletBot.Discord.Commands
             var message = await ReplyAsync("Fetching help...");
 
             IEnumerable<ModuleInfo> modules =
-                from module in Commands.Modules
+                from module in _commands.Modules
                 where !ExcludedModules.Contains(module.Name)
                 where module.Parent == null
                 select module;
@@ -60,9 +63,9 @@ namespace TabletBot.Discord.Commands
 
             foreach (var command in commands)
             {
-                var result = await command.CheckPreconditionsAsync(Context, Services);
+                var result = await command.CheckPreconditionsAsync(Context, _services);
                 if (result.IsSuccess)
-                    command.EmbedParameters(ref embed);
+                    command.EmbedParameters(ref embed, _settings);
             }
 
             await message.Update(embed);

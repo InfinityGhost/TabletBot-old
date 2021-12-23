@@ -12,17 +12,20 @@ namespace TabletBot.Discord.Watchers.Commands
 {
     public class SlashCommandInteractionWatcher : IInteractionWatcher, IAsyncInitialize
     {
+        private readonly Settings _settings;
+        private readonly DiscordSocketClient _client;
+        private readonly IEnumerable<SlashCommandModule> _commands;
+
         public SlashCommandInteractionWatcher(
-            DiscordSocketClient discordClient,
+            Settings settings,
+            DiscordSocketClient client,
             IEnumerable<SlashCommandModule> commands
         )
         {
-            _client = discordClient;
+            _settings = settings;
+            _client = client;
             _commands = commands;
         }
-
-        private readonly DiscordSocketClient _client;
-        private readonly IEnumerable<SlashCommandModule> _commands;
 
         private bool _registered;
 
@@ -47,7 +50,7 @@ namespace TabletBot.Discord.Watchers.Commands
             var moderatorCommands = new List<RestGuildCommand>();
             foreach (var command in module.CommandHandlers)
             {
-                var guildCommand = await _client.Rest.CreateGuildCommand(command.Build(), Settings.Current.GuildID);
+                var guildCommand = await _client.Rest.CreateGuildCommand(command.Build(), _settings.GuildID);
                 if (guildCommand.IsDefaultPermission == false)
                     moderatorCommands.Add(guildCommand);
             }
@@ -59,8 +62,8 @@ namespace TabletBot.Discord.Watchers.Commands
 
         private async Task ApplyCommandPermissions(DiscordSocketClient client, IEnumerable<RestGuildCommand> moderatorCommands)
         {
-            var guild = client.GetGuild(Settings.Current.GuildID);
-            var modRole = guild.GetRole(Settings.Current.ModeratorRoleID);
+            var guild = client.GetGuild(_settings.GuildID);
+            var modRole = guild.GetRole(_settings.ModeratorRoleID);
 
             if (modRole != null)
             {
@@ -76,14 +79,14 @@ namespace TabletBot.Discord.Watchers.Commands
 
                 if (permDict.Any())
                 {
-                    await client.Rest.BatchEditGuildCommandPermissions(Settings.Current.GuildID, permDict);
+                    await client.Rest.BatchEditGuildCommandPermissions(_settings.GuildID, permDict);
                 }
             }
         }
 
         private async Task UpdateModule(SlashCommandModule module)
         {
-            var applicationCommands = await _client.Rest.GetGuildApplicationCommands(Settings.Current.GuildID);
+            var applicationCommands = await _client.Rest.GetGuildApplicationCommands(_settings.GuildID);
             var handlers = module.BuildCommandHandlers();
 
             var commandsToUpdate = from handler in handlers
@@ -97,7 +100,7 @@ namespace TabletBot.Discord.Watchers.Commands
             {
                 await updateable.command.DeleteAsync();
 
-                var guildCommand = await _client.Rest.CreateGuildCommand(updateable.handler.Build(), Settings.Current.GuildID);
+                var guildCommand = await _client.Rest.CreateGuildCommand(updateable.handler.Build(), _settings.GuildID);
                 if (guildCommand.IsDefaultPermission == false)
                     moderatorCommands.Add(guildCommand);
 

@@ -9,10 +9,12 @@ namespace TabletBot.Discord.Commands
     public class ModerationCommands : ModuleBase
     {
         private readonly Bot _bot;
+        private readonly Settings _settings;
 
-        public ModerationCommands(Bot bot)
+        public ModerationCommands(Bot bot, Settings settings)
         {
             _bot = bot;
+            _settings = settings;
         }
 
         [Command("delete", RunMode = RunMode.Async), Name("Delete"), Alias("del"), RequireUserPermission(GuildPermission.ManageMessages)]
@@ -27,7 +29,7 @@ namespace TabletBot.Discord.Commands
         public async Task ForceSaveSettings()
         {
             await Context.Message.DeleteAsync();
-            await Settings.Current.Write(Platform.SettingsFile);
+            await _settings.Write(Platform.SettingsFile);
             await Log.WriteAsync("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {Platform.SettingsFile.FullName}");
         }
 
@@ -43,16 +45,16 @@ namespace TabletBot.Discord.Commands
         public async Task SetPrefix([Remainder] string prefix)
         {
             await Context.Message.DeleteAsync();
-            Settings.Current.CommandPrefix = prefix;
-            var message = await ReplyAsync(string.Format("Set the command prefix to `{0}`.", Settings.Current.CommandPrefix));
-            message.DeleteDelayed();
+            _settings.CommandPrefix = prefix;
+            var message = await ReplyAsync(string.Format("Set the command prefix to `{0}`.", _settings.CommandPrefix));
+            message.DeleteDelayed(_settings.DeleteDelay);
         }
 
         [Command("set-reply-delete-delay", RunMode = RunMode.Async), Name("Set bot reply delete delay"), RequireOwner]
         public async Task SetReplyDeleteDelay(TimeSpan delay)
         {
             await Context.Message.DeleteAsync();
-            Settings.Current.DeleteDelay = (int)delay.TotalMilliseconds;
+            _settings.DeleteDelay = (int)delay.TotalMilliseconds;
             
             var embed = new EmbedBuilder
             {
@@ -62,12 +64,12 @@ namespace TabletBot.Discord.Commands
                     new EmbedFieldBuilder
                     {
                         Name = "Delay",
-                        Value = Settings.Current.DeleteDelay
+                        Value = _settings.DeleteDelay
                     }
                 }
             };
             var message = await ReplyAsync(embed: embed.Build());
-            message.DeleteDelayed();
+            message.DeleteDelayed(_settings.DeleteDelay);
         }
     }
 }

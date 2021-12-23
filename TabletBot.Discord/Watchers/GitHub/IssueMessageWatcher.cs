@@ -14,10 +14,12 @@ namespace TabletBot.Discord.Watchers.GitHub
 {
     public class IssueMessageWatcher : IMessageWatcher
     {
-        private GitHubClient _gitHubClient;
+        private readonly Settings _settings;
+        private readonly GitHubClient _gitHubClient;
 
-        public IssueMessageWatcher(GitHubClient gitHubClient)
+        public IssueMessageWatcher(Settings settings, GitHubClient gitHubClient)
         {
+            _settings = settings;
             _gitHubClient = gitHubClient;
         }
 
@@ -34,7 +36,7 @@ namespace TabletBot.Discord.Watchers.GitHub
                 uint refNum = 0;
                 foreach (int issueRef in refs)
                 {
-                    if (refNum == Settings.Current.GitHubIssueRefLimit)
+                    if (refNum == _settings.GitHubIssueRefLimit)
                         break;
 
                     var issues = await _gitHubClient.Issue.GetAllForRepository(OWNER, NAME);
