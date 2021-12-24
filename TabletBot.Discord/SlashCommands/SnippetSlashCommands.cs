@@ -13,12 +13,19 @@ namespace TabletBot.Discord.SlashCommands
 {
     public sealed class SnippetSlashCommands : SlashCommandModule
     {
+        private readonly Settings _settings;
+
+        public SnippetSlashCommands(Settings settings)
+        {
+            _settings = settings;
+        }
+
         private const string SHOW_SNIPPET = "snippet";
         private const string SET_SNIPPET = "set-snippet";
         private const string REMOVE_SNIPPET = "remove-snippet";
         private const string EXPORT_SNIPPET = "export-snippet";
 
-        private static IList<SnippetStore> Snippets => Settings.Current.Snippets;
+        private IList<SnippetStore> Snippets => _settings.Snippets;
 
         protected override IEnumerable<SlashCommand> GetSlashCommands()
         {
@@ -132,11 +139,11 @@ namespace TabletBot.Discord.SlashCommands
             };
         }
 
-        private static async Task ShowSnippet(SocketSlashCommand command)
+        private async Task ShowSnippet(SocketSlashCommand command)
         {
             var snippet = command.GetValue<string>("snippet");
 
-            if (SnippetEmbeds.TryGetSnippetEmbed(snippet, out var embed))
+            if (SnippetEmbeds.TryGetSnippetEmbed(_settings, snippet, out var embed))
                 await command.RespondAsync(embed: embed.Build());
             else
                 await command.RespondAsync("Could not find snippet");
@@ -161,7 +168,7 @@ namespace TabletBot.Discord.SlashCommands
                 Snippets.Add(store);
             }
 
-            await Settings.Current.Overwrite();
+            await _settings.Overwrite();
             OnUpdate();
             await command.RespondAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
         }
@@ -186,7 +193,7 @@ namespace TabletBot.Discord.SlashCommands
                         }
                     }
                 };
-                await Settings.Current.Overwrite();
+                await _settings.Overwrite();
                 OnUpdate();
                 await command.RespondAsync(embed: embed.Build());
             }
@@ -196,7 +203,7 @@ namespace TabletBot.Discord.SlashCommands
             }
         }
 
-        private static async Task ExportSnippet(SocketSlashCommand command)
+        private async Task ExportSnippet(SocketSlashCommand command)
         {
             var snippet = command.GetValue<string>("snippet");
 
@@ -212,14 +219,14 @@ namespace TabletBot.Discord.SlashCommands
             }
         }
 
-        private static List<ApplicationCommandOptionChoiceProperties> GetSnippets()
+        private List<ApplicationCommandOptionChoiceProperties> GetSnippets()
         {
-            if (!Settings.Current.Snippets?.Any() ?? false)
+            if (!_settings.Snippets?.Any() ?? false)
             {
                 return new List<ApplicationCommandOptionChoiceProperties>();
             }
 
-            return Settings.Current.Snippets.Select(s =>
+            return _settings.Snippets.Select(s =>
                 new ApplicationCommandOptionChoiceProperties
                 {
                     Name = s.Title,

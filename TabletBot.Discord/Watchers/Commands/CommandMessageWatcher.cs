@@ -10,29 +10,32 @@ namespace TabletBot.Discord.Watchers.Commands
 {
     public class CommandMessageWatcher : IMessageWatcher, IAsyncInitialize
     {
+        private readonly Settings _settings;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly DiscordSocketClient _discordClient;
+        private readonly CommandService _commandService;
+        private readonly IEnumerable<Type> _commands;
+
         public CommandMessageWatcher(
+            Settings settings,
             IServiceProvider serviceProvider,
             DiscordSocketClient discordClient,
             CommandService commandService,
-            IEnumerable<Type> modules
+            IEnumerable<Type> commands
         )
         {
+            _settings = settings;
             _serviceProvider = serviceProvider;
             _discordClient = discordClient;
             _commandService = commandService;
-            _commands = modules.OfType<ModuleBase<ICommandContext>>();
+            _commands = commands;
         }
-
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IDiscordClient _discordClient;
-        private readonly CommandService _commandService;
-        private readonly IEnumerable<Type> _commands;
 
         private bool _registered;
 
         public async Task Receive(IMessage message)
         {
-            if (message.Content.StartsWith(Settings.Current.CommandPrefix))
+            if (message.Content.StartsWith(_settings.CommandPrefix))
             {
                 var context = new CommandContext(_discordClient, message as IUserMessage);
                 await _commandService.ExecuteAsync(context, 1, _serviceProvider).ConfigureAwait(false);
@@ -66,7 +69,7 @@ namespace TabletBot.Discord.Watchers.Commands
                     _ => await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}")
                 };
 
-                DiscordExtensions.DeleteAllDelayed(context.Message, msg);
+                DiscordExtensions.DeleteAllDelayed(_settings.DeleteDelay, context.Message, msg);
             }
         }
     }

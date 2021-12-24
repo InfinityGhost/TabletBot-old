@@ -15,15 +15,11 @@ namespace TabletBot.Common
         private const ulong MODERATOR_ROLE_ID = 644180151755735060;
         private const ulong MUTED_ROLE_ID = 715342682293010452;
 
-        public static Settings Current { set; get; } = new Settings();
-
         public int DeleteDelay { set; get; } = 5000;
         public ulong GuildID { set; get; } = MAIN_GUILD_ID;
         public ulong LogMessageChannelID { set; get; } = LOG_MESSAGE_CHANNEL_ID;
         public ulong ModeratorRoleID { set; get; } = MODERATOR_ROLE_ID;
         public ulong MutedRoleID { set; get; } = MUTED_ROLE_ID;
-        public string DiscordBotToken { set; get; } = null;
-        public string GitHubToken { set; get; } = null;
         public string CommandPrefix { set; get; } = "!";
         public uint GitHubIssueRefLimit { set; get; } = 3;
         public uint SpamThreshold { set; get; } = 3;

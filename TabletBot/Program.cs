@@ -2,34 +2,30 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Octokit;
 using TabletBot.Common;
 using TabletBot.Discord;
 
+#nullable enable
+
 namespace TabletBot
 {
     partial class Program
     {
-        public static Bot Bot { private set; get; }
-        public static DiscordSocketClient DiscordClient { private set; get; }
+        public static Bot? Bot { private set; get; }
+        public static Settings? Settings { private set; get; }
+        public static DiscordSocketClient? DiscordClient { private set; get; }
 
         private static async Task Main(string[] args)
         {
-            Settings.Current = Platform.SettingsFile.Exists ? await Settings.Read(Platform.SettingsFile) : new Settings();
+            string discordToken = Environment.GetEnvironmentVariable("DISCORD_TOKEN")!;
+            string githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")!;
+            Settings = Platform.SettingsFile.Exists ? await Settings.Read(Platform.SettingsFile) : new Settings();
 
             var root = new RootCommand("TabletBot")
             {
-                new Option<string>(new string[] { "-t", "--discord-token" }, "Sets the bot's Discord API token.")
-                {
-                    Argument = new Argument<string>("discordToken")
-                },
-                new Option<string>("--github-token", "Sets the bot's GitHub API token.")
-                {
-                    Argument = new Argument<string>("githubToken")
-                },
                 new Option<bool>("--unit", "Runs the bot as a unit." )
                 {
                     Argument = new Argument<bool>("unit")
@@ -40,15 +36,10 @@ namespace TabletBot
                 }
             };
 
-            root.Handler = CommandHandler.Create<string, string, bool, LogLevel?>((discordToken, githubToken, unit, level) =>
+            root.Handler = CommandHandler.Create<bool, LogLevel?>((unit, level) =>
             {
-                Settings.Current.DiscordBotToken ??= discordToken ?? Environment.GetEnvironmentVariable("DISCORD_TOKEN");
-                Settings.Current.GitHubToken ??= githubToken ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
-                
-                if (level is LogLevel limitLevel)
-                    Settings.Current.LogLevel = limitLevel;
-
-                Settings.Current.RunAsUnit = unit;
+                Settings.LogLevel = level ?? default;
+                Settings.RunAsUnit = unit;
             });
 
             if (await root.InvokeAsync(args) != 0)
@@ -56,26 +47,26 @@ namespace TabletBot
 
             Log.Output += message =>
             {
-                if (message.Level >= Settings.Current.LogLevel)
+                if (message.Level >= Settings.LogLevel)
                     IO.WriteLogMessage(message);
             };
 
-            if (!Settings.Current.RunAsUnit)
+            if (!Settings.RunAsUnit)
                 IO.WriteMessageHeader();
 
             var config = new DiscordSocketConfig();
             DiscordClient = new DiscordSocketClient(config);
-            var gitHubClient = await AuthenticateGitHub(Settings.Current.GitHubToken);
+            var gitHubClient = await AuthenticateGitHub(githubToken);
 
-            var serviceCollection = BotServiceCollection.Build(DiscordClient, gitHubClient);
+            var serviceCollection = BotServiceCollection.Build(Settings, DiscordClient, gitHubClient);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             Bot = serviceProvider.GetRequiredService<Bot>();
-            await Bot.Login(Settings.Current.DiscordBotToken);
+            await Bot.Login(discordToken);
 
             while (Bot.IsRunning)
             {
-                if (Settings.Current.RunAsUnit)
+                if (Settings.RunAsUnit)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
@@ -102,7 +93,7 @@ namespace TabletBot
             }
         }
 
-        private static async Task<GitHubClient> AuthenticateGitHub(string token)
+        private static async Task<GitHubClient?> AuthenticateGitHub(string token)
         {
             if (!string.IsNullOrWhiteSpace(token))
             {
@@ -114,7 +105,6 @@ namespace TabletBot
                         Credentials = new Credentials(token)
                     };
 
-                    Settings.Current.GitHubToken = token;
                     await Log.WriteAsync("GitHub", "Authenticated client.");
                     return githubClient;
                 }

@@ -12,36 +12,16 @@ namespace TabletBot.Discord
 {
     internal static class DiscordExtensions
     {
-        public static void DeleteAllDelayed(params IMessage[] messages)
+        public static void DeleteAllDelayed(int delay, params IMessage[] messages)
         {
             try
             {
-                Parallel.ForEach(messages, m => m.DeleteDelayed());
+                Parallel.ForEach(messages, m => m.DeleteDelayed(delay));
             }
             catch (Exception ex)
             {
                 Log.Exception(ex);
             }
-        }
-
-        public static bool IsTracked(
-            this SocketReaction reaction,
-            DiscordSocketClient client,
-            out RoleManagementMessageStore reactionRole
-        )
-        {
-            if (reaction.UserId == client.CurrentUser.Id)
-            {
-                reactionRole = default;
-                return false;
-            }
-
-            var query = from reactRole in Settings.Current.ReactiveRoles
-                where reactRole.MessageId == reaction.MessageId
-                where reactRole.EmoteName == reaction.Emote.ToString()
-                select reactRole;
-            reactionRole = query.FirstOrDefault();
-            return reactionRole != null;
         }
 
         public static async Task<IMessage> ReplyException(IMessageChannel channel, Exception ex)

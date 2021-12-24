@@ -3,7 +3,8 @@ using System.Linq;
 using System.Reflection;
 using TabletBot.Common;
 using TabletBot.Common.Attributes.Bot;
-using TabletBot.Discord;
+
+#nullable enable
 
 namespace TabletBot
 {
@@ -26,7 +27,7 @@ namespace TabletBot
         [Command, Alias("Exit")]
         public static void Stop(params string[] args)
         {
-            Bot.IsRunning = false;
+            Bot!.IsRunning = false;
         }
 
         [Command("Channel ID", "Message"), Alias("Message")]
@@ -34,7 +35,7 @@ namespace TabletBot
         {
             ulong id = Convert.ToUInt64(args[0]);
             string message = string.Join(' ', args[1..^0]);
-            await Bot.Send(id, message);
+            await Bot!.Send(id, message);
         }
 
         [Command]
@@ -42,7 +43,7 @@ namespace TabletBot
         {
             using (var box = new Box("Settings"))
             {
-                var output = await Settings.Current.ExportAsync();
+                var output = await Settings!.ExportAsync();
                 box.WriteLine(output);
             }
         }
@@ -62,7 +63,7 @@ namespace TabletBot
                         newValue = Enum.Parse(property.PropertyType, valueStr);
                     else
                         newValue = Convert.ChangeType(valueStr, property.PropertyType);
-                    property.SetValue(Settings.Current, newValue);
+                    property.SetValue(Settings, newValue);
                     Log.Write("Settings", "Updated setting.");
                 }
                 catch (Exception ex)
@@ -79,7 +80,7 @@ namespace TabletBot
         [Command]
         public static async void SaveSettings(params string[] args)
         {
-            await Settings.Current.Write(Platform.SettingsFile);
+            await Settings!.Write(Platform.SettingsFile);
             await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
         }
     }
