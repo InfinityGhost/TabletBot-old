@@ -10,10 +10,10 @@ namespace TabletBot.Discord.SlashCommands
 {
     public class ModerationSlashCommands : SlashCommandModule
     {
-        protected const string DELETE = "delete";
-        protected const string KICK_USER = "kick";
-        protected const string BAN_USER = "ban";
-        protected const string CREATE_EMBED = "embed";
+        private const string DELETE = "delete";
+        private const string KICK_USER = "kick";
+        private const string BAN_USER = "ban";
+        private const string CREATE_EMBED = "embed";
 
         protected override IEnumerable<SlashCommand> GetSlashCommands()
         {
@@ -165,7 +165,7 @@ namespace TabletBot.Discord.SlashCommands
 
         private async Task Delete(SocketSlashCommand command)
         {
-            var amount = command.GetValue<int>("amount", 1);
+            var amount = (int)command.GetValue<long>("amount", 1);
 
             var messages = await command.Channel.GetMessagesAsync(amount).FlattenAsync();
             await (command.Channel as ITextChannel).DeleteMessagesAsync(messages);

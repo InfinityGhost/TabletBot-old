@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using TabletBot.Common;
+using TabletBot.Discord.Commands;
 
 namespace TabletBot.Discord.Watchers.Commands
 {
@@ -28,7 +29,7 @@ namespace TabletBot.Discord.Watchers.Commands
             _serviceProvider = serviceProvider;
             _discordClient = discordClient;
             _commandService = commandService;
-            _commands = commands;
+            _commands = commands.OfType<ModuleBase<ICommandContext>>();
         }
 
         private bool _registered;
