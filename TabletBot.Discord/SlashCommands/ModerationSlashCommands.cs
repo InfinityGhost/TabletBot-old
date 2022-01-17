@@ -169,7 +169,7 @@ namespace TabletBot.Discord.SlashCommands
 
             var messages = await command.Channel.GetMessagesAsync(amount).FlattenAsync();
             await (command.Channel as ITextChannel).DeleteMessagesAsync(messages);
-            await command.RespondAsync($"Deleted {amount} messages.", ephemeral: true);
+            await command.FollowupAsync($"Deleted {amount} messages.", ephemeral: true);
         }
 
         private async Task Kick(SocketSlashCommand command)
@@ -181,13 +181,13 @@ namespace TabletBot.Discord.SlashCommands
             {
                 await user.KickAsync(reason);
                 if (reason != null)
-                    await command.RespondAsync($"Kicked {user.Mention} for \"{reason}\".", ephemeral: true);
+                    await command.FollowupAsync($"Kicked {user.Mention} for \"{reason}\".", ephemeral: true);
                 else
-                    await command.RespondAsync($"Kicked {user.Mention}.", ephemeral: true);
+                    await command.FollowupAsync($"Kicked {user.Mention}.", ephemeral: true);
             }
             else
             {
-                await command.RespondAsync(
+                await command.FollowupAsync(
                     $"This user is not a member of this guild.",
                     ephemeral: true
                 );
@@ -205,13 +205,13 @@ namespace TabletBot.Discord.SlashCommands
             {
                 await user.BanAsync(reason: reason);
                 if (reason != null)
-                    await command.RespondAsync($"Banned {user.Mention} for \"{reason}\".", ephemeral: true);
+                    await command.FollowupAsync($"Banned {user.Mention} for \"{reason}\".", ephemeral: true);
                 else
-                    await command.RespondAsync($"Banned {user.Mention}.", ephemeral: true);
+                    await command.FollowupAsync($"Banned {user.Mention}.", ephemeral: true);
             }
             else
             {
-                await command.RespondAsync(
+                await command.FollowupAsync(
                     $"This user is not a member of this guild.",
                     ephemeral: true
                 );
@@ -243,7 +243,7 @@ namespace TabletBot.Discord.SlashCommands
             if (image != null)
                 embed = embed.WithImageUrl(image);
             
-            await command.RespondAsync(embed: embed.Build());
+            await command.FollowupAsync(embed: embed.Build());
         }
     }
 }

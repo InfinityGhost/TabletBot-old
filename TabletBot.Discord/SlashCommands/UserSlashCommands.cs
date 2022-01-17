@@ -42,12 +42,12 @@ namespace TabletBot.Discord.SlashCommands
             if (tablet != null)
             {
                 await user.ModifyAsync(u => u.Nickname = $"{user.Username} | {tablet}");
-                await command.RespondAsync($"Your nickname has updated to include your tablet.", ephemeral: true);
+                await command.FollowupAsync($"Your nickname has updated to include your tablet.", ephemeral: true);
             }
             else
             {
                 await user.ModifyAsync(u => u.Nickname = null);
-                await command.RespondAsync($"Your nickname has been reset.", ephemeral: true);
+                await command.FollowupAsync($"Your nickname has been reset.", ephemeral: true);
             }
         }
     }

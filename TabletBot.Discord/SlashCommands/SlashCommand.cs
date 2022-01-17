@@ -22,6 +22,7 @@ namespace TabletBot.Discord.SlashCommands
                 var user = command.User as IGuildUser;
                 if (HasCorrectPermissions(user))
                 {
+                    await command.DeferAsync(true);
                     await Handler(command);
                 }
                 else

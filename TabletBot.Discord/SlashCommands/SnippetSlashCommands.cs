@@ -144,9 +144,9 @@ namespace TabletBot.Discord.SlashCommands
             var snippet = command.GetValue<string>("snippet");
 
             if (SnippetEmbeds.TryGetSnippetEmbed(_settings, snippet, out var embed))
-                await command.RespondAsync(embed: embed.Build());
+                await command.FollowupAsync(embed: embed.Build());
             else
-                await command.RespondAsync("Could not find snippet");
+                await command.FollowupAsync("Could not find snippet");
         }
 
         private async Task SetSnippet(SocketSlashCommand command)
@@ -170,7 +170,7 @@ namespace TabletBot.Discord.SlashCommands
 
             await _settings.Overwrite();
             OnUpdate();
-            await command.RespondAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
+            await command.FollowupAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
         }
 
         private async Task RemoveSnippet(SocketSlashCommand command)
@@ -195,11 +195,11 @@ namespace TabletBot.Discord.SlashCommands
                 };
                 await _settings.Overwrite();
                 OnUpdate();
-                await command.RespondAsync(embed: embed.Build());
+                await command.FollowupAsync(embed: embed.Build());
             }
             else
             {
-                await command.RespondAsync("Could not find snippet");
+                await command.FollowupAsync("Could not find snippet");
             }
         }
 
@@ -215,7 +215,7 @@ namespace TabletBot.Discord.SlashCommands
                 sb.AppendLine(store.Content.Replace(Environment.NewLine, @"\n"));
                 sb.AppendLine(Formatting.CODE_BLOCK);
 
-                await command.RespondAsync(sb.ToString());
+                await command.FollowupAsync(sb.ToString());
             }
         }
 
