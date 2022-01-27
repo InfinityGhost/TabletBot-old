@@ -31,7 +31,32 @@ namespace TabletBot.Discord.Watchers.Commands
 
         public async Task HandleInteraction(SocketInteraction interaction)
         {
-            await Task.WhenAll(_commands.Select(m => m.HandleInteraction(interaction)));
+            try
+            {
+                await Task.WhenAll(_commands.Select(m => m.HandleInteraction(interaction)));
+            }
+            catch (Exception e)
+            {
+                Log.Exception(e);
+                try
+                {
+                    string message = e.GetType().FullName + ": " + e.Message;
+                    if (interaction.HasResponded)
+                    {
+                        await interaction.FollowupAsync(message, ephemeral: true);
+                    }
+                    else
+                    {
+                        await interaction.RespondAsync(message, ephemeral: true);
+                    }
+                }
+                catch (Exception responseEx)
+                {
+                    Log.Exception(responseEx);
+                }
+
+                throw;
+            }
         }
 
         public async Task InitializeAsync()
