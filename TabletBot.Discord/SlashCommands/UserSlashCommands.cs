@@ -16,6 +16,7 @@ namespace TabletBot.Discord.SlashCommands
             {
                 Name = SET_TABLET,
                 Handler = SetTablet,
+                Ephemeral = true,
                 Builder = new SlashCommandBuilder
                 {
                     Name = SET_TABLET,
@@ -42,12 +43,12 @@ namespace TabletBot.Discord.SlashCommands
             if (tablet != null)
             {
                 await user.ModifyAsync(u => u.Nickname = $"{user.Username} | {tablet}");
-                await command.FollowupAsync($"Your nickname has updated to include your tablet.", ephemeral: true);
+                await command.FollowupAsync($"Your nickname has updated to include your tablet.");
             }
             else
             {
                 await user.ModifyAsync(u => u.Nickname = null);
-                await command.FollowupAsync($"Your nickname has been reset.", ephemeral: true);
+                await command.FollowupAsync($"Your nickname has been reset.");
             }
         }
     }

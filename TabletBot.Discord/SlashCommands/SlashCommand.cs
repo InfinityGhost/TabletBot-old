@@ -12,12 +12,13 @@ namespace TabletBot.Discord.SlashCommands
         public SlashCommandBuilder Builder { set; get; }
         public Func<SocketSlashCommand, Task> Handler { set; get; }
         public GuildPermissions? MinimumPermissions { set; get; }
+        public bool Ephemeral { set; get; }
 
         public SlashCommandProperties Build() => Builder.Build();
 
         public async Task Invoke(SocketSlashCommand command)
         {
-            await command.DeferAsync(true);
+            await command.DeferAsync(Ephemeral);
             if (MinimumPermissions is GuildPermissions permissions)
             {
                 var user = command.User as IGuildUser;
@@ -27,7 +28,7 @@ namespace TabletBot.Discord.SlashCommands
                 }
                 else
                 {
-                    await command.FollowupAsync("You do not have permissions to use this command.", ephemeral: true);
+                    await command.FollowupAsync("You do not have permissions to use this command.");
                 }
             }
             else

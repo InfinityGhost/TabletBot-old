@@ -144,7 +144,7 @@ namespace TabletBot.Discord.SlashCommands
             var snippet = command.GetValue<string>("snippet");
 
             if (SnippetEmbeds.TryGetSnippetEmbed(_settings, snippet, out var embed))
-                await command.FollowupAsync(embed: embed.Build());
+                await command.FollowupAsync(embed: embed.Build(), ephemeral: false);
             else
                 await command.FollowupAsync("Could not find snippet");
         }

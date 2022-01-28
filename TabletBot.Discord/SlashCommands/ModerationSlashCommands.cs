@@ -21,6 +21,7 @@ namespace TabletBot.Discord.SlashCommands
             {
                 Name = DELETE,
                 Handler = Delete,
+                Ephemeral = true,
                 MinimumPermissions = GuildPermissions.None.Modify(
                     manageMessages: true
                 ),
@@ -45,6 +46,7 @@ namespace TabletBot.Discord.SlashCommands
             {
                 Name = KICK_USER,
                 Handler = Kick,
+                Ephemeral = true,
                 MinimumPermissions = GuildPermissions.None.Modify(
                     kickMembers: true
                 ),
@@ -76,6 +78,7 @@ namespace TabletBot.Discord.SlashCommands
             {
                 Name = BAN_USER,
                 Handler = Ban,
+                Ephemeral = true,
                 MinimumPermissions = GuildPermissions.None.Modify(
                     banMembers: true
                 ),
@@ -107,6 +110,7 @@ namespace TabletBot.Discord.SlashCommands
             {
                 Name = CREATE_EMBED,
                 Handler = CreateEmbed,
+                Ephemeral = false,
                 MinimumPermissions = GuildPermissions.None.Modify(
                     sendTTSMessages: true
                 ),
@@ -169,7 +173,7 @@ namespace TabletBot.Discord.SlashCommands
 
             var messages = await command.Channel.GetMessagesAsync(amount).FlattenAsync();
             await (command.Channel as ITextChannel).DeleteMessagesAsync(messages);
-            await command.FollowupAsync($"Deleted {amount} messages.", ephemeral: true);
+            await command.FollowupAsync($"Deleted {amount} messages.");
         }
 
         private async Task Kick(SocketSlashCommand command)
@@ -181,16 +185,13 @@ namespace TabletBot.Discord.SlashCommands
             {
                 await user.KickAsync(reason);
                 if (reason != null)
-                    await command.FollowupAsync($"Kicked {user.Mention} for \"{reason}\".", ephemeral: true);
+                    await command.FollowupAsync($"Kicked {user.Mention} for \"{reason}\".");
                 else
-                    await command.FollowupAsync($"Kicked {user.Mention}.", ephemeral: true);
+                    await command.FollowupAsync($"Kicked {user.Mention}.");
             }
             else
             {
-                await command.FollowupAsync(
-                    $"This user is not a member of this guild.",
-                    ephemeral: true
-                );
+                await command.FollowupAsync("This user is not a member of this guild.");
             }
         }
 
@@ -205,16 +206,13 @@ namespace TabletBot.Discord.SlashCommands
             {
                 await user.BanAsync(reason: reason);
                 if (reason != null)
-                    await command.FollowupAsync($"Banned {user.Mention} for \"{reason}\".", ephemeral: true);
+                    await command.FollowupAsync($"Banned {user.Mention} for \"{reason}\".");
                 else
-                    await command.FollowupAsync($"Banned {user.Mention}.", ephemeral: true);
+                    await command.FollowupAsync($"Banned {user.Mention}.");
             }
             else
             {
-                await command.FollowupAsync(
-                    $"This user is not a member of this guild.",
-                    ephemeral: true
-                );
+                await command.FollowupAsync("This user is not a member of this guild.");
             }
         }
         
