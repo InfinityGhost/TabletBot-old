@@ -17,17 +17,17 @@ namespace TabletBot.Discord.SlashCommands
 
         public async Task Invoke(SocketSlashCommand command)
         {
+            await command.DeferAsync(true);
             if (MinimumPermissions is GuildPermissions permissions)
             {
                 var user = command.User as IGuildUser;
                 if (HasCorrectPermissions(user))
                 {
-                    await command.DeferAsync(true);
                     await Handler(command);
                 }
                 else
                 {
-                    await command.RespondAsync("You do not have permissions to use this command.", ephemeral: true);
+                    await command.FollowupAsync("You do not have permissions to use this command.", ephemeral: true);
                 }
             }
             else
