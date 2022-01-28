@@ -38,8 +38,26 @@ namespace TabletBot.Discord.Watchers.Commands
         {
             if (message.Content.StartsWith(_settings.CommandPrefix))
             {
-                var context = new CommandContext(_discordClient, message as IUserMessage);
-                await _commandService.ExecuteAsync(context, 1, _serviceProvider).ConfigureAwait(false);
+                try
+                {
+                    var context = new CommandContext(_discordClient, message as IUserMessage);
+                    await _commandService.ExecuteAsync(context, 1, _serviceProvider).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Log.Exception(e);
+                    try
+                    {
+                        string exMessage = e.GetType().FullName + ": " + e.Message;
+                        await (message as IUserMessage).ReplyAsync(exMessage);
+                    }
+                    catch (Exception respondEx)
+                    {
+                        Log.Exception(respondEx);
+                    }
+
+                    throw;
+                }
             }
         }
 
