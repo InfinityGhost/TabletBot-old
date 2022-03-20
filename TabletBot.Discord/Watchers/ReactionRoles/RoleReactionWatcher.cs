@@ -5,7 +5,6 @@ using Discord;
 using Discord.WebSocket;
 using TabletBot.Common;
 using TabletBot.Common.Store;
-using TabletBot.Discord.Commands;
 using static TabletBot.Discord.DiscordExtensions;
 
 namespace TabletBot.Discord.Watchers.ReactionRoles
@@ -48,8 +47,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
             catch (Exception ex)
             {
                 var systemChannel = await channel.Guild.GetSystemChannelAsync();
-                var reply = await ReplyException(systemChannel ?? channel, ex);
-                reply.DeleteDelayed(_settings.DeleteDelay);
+                await ReplyException(systemChannel ?? channel, ex);
                 Log.Exception(ex);
             }
         }
@@ -69,8 +67,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
             catch (Exception ex)
             {
                 var systemChannel = await channel.Guild.GetSystemChannelAsync();
-                var reply = await ReplyException(systemChannel ?? channel, ex);
-                reply.DeleteDelayed(_settings.DeleteDelay);
+                await ReplyException(systemChannel ?? channel, ex);
                 Log.Exception(ex);
             }
         }

@@ -143,7 +143,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
 
-            if (SnippetEmbeds.TryGetSnippetEmbed(_settings, snippet, out var embed))
+            if (SnippetEmbeds.GetSnippetEmbed(_settings, snippet, out var embed))
                 await command.FollowupAsync(embed: embed.Build(), ephemeral: false);
             else
                 await command.FollowupAsync("Could not find snippet");
@@ -170,7 +170,12 @@ namespace TabletBot.Discord.SlashCommands
 
             await _settings.Overwrite();
             OnUpdate();
-            await command.FollowupAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
+            await command.FollowupAsync(embed: new EmbedBuilder
+            {
+                Title = store.Title,
+                Color = Color.Magenta,
+                Description = store.Content
+            }.Build());
         }
 
         private async Task RemoveSnippet(SocketSlashCommand command)

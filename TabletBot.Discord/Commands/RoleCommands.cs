@@ -5,9 +5,11 @@ using Discord.Commands;
 using Discord.WebSocket;
 using TabletBot.Common;
 using TabletBot.Common.Store;
+using TabletBot.Discord.Commands.Attributes;
 
 namespace TabletBot.Discord.Commands
 {
+    [Module]
     public class RoleCommands : CommandModule
     {
         private readonly Settings _settings;
@@ -24,7 +26,6 @@ namespace TabletBot.Discord.Commands
         public async Task AddReactiveRole(IRole role, string emote)
         {
             var message = Context.Message.ReferencedMessage!;
-            var messageRef = new MessageReference(message.Id, message.Channel.Id);
 
             var emoji = emote.GetEmote();
             await message.AddReactionAsync(emoji);
@@ -32,10 +33,7 @@ namespace TabletBot.Discord.Commands
             _settings.ReactiveRoles.Add(reactionRole);
             await _settings.Overwrite();
 
-            var reply = await ReplyAsync($"Reactive role added: {reactionRole.EmoteName}",
-                messageReference: messageRef);
-            reply.DeleteDelayed(_settings.DeleteDelay);
-            await Context.Message.DeleteAsync();
+            await ReplyAsync($"Reactive role added: {reactionRole.EmoteName}", messageReference: message.ToReference());
         }
 
         [Command("remove-react-role", RunMode = RunMode.Async), Name("Remove reactive role")]
@@ -51,15 +49,12 @@ namespace TabletBot.Discord.Commands
                 await message.RemoveReactionAsync(emoji, _discordSocketClient.CurrentUser);
                 await _settings.Overwrite();
                 
-                var reply = await ReplyAsync($"Reactive role removed from: {reactiveRole.EmoteName}", messageReference: messageRef);
-                reply.DeleteDelayed(_settings.DeleteDelay);
+                await ReplyAsync($"Reactive role removed from: {reactiveRole.EmoteName}", messageReference: messageRef);
             }
             else
             {
-                var reply = await ReplyAsync($"{role.Name} is not assigned as reactive to the referenced message.");
-                reply.DeleteDelayed(_settings.DeleteDelay);
+                await ReplyAsync($"{role.Name} is not assigned as reactive to the referenced message.");
             }
-            await Context.Message.DeleteAsync();
         }
     }
 }

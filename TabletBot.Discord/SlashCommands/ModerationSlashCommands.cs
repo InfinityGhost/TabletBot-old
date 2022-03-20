@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Octokit;
-using TabletBot.Common;
 
 namespace TabletBot.Discord.SlashCommands
 {

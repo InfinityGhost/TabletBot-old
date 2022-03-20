@@ -84,5 +84,13 @@ namespace TabletBot.Discord.Commands
                 IconUrl = user.GetAvatarUrl()
             };
         }
+
+        public static MessageReference ToReference(this IUserMessage message)
+        {
+            if (message.Channel is IGuildChannel guildChannel)
+                return new MessageReference(message.Id, message.Channel.Id, guildChannel.GuildId);
+
+            return new MessageReference(message.Id, message.Channel.Id);
+        }
     }
 }

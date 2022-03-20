@@ -6,12 +6,14 @@ using Discord;
 using Discord.Commands;
 using TabletBot.Common;
 using TabletBot.Common.Store;
+using TabletBot.Discord.Commands.Attributes;
 using TabletBot.Discord.Embeds;
 using TabletBot.Discord.SlashCommands;
 using TabletBot.Discord.Watchers;
 
 namespace TabletBot.Discord.Commands
 {
+    [Module]
     public class SnippetCommands : CommandModule
     {
         public SnippetCommands(Settings settings, IEnumerable<SlashCommandModule> slashCommands)
@@ -34,28 +36,19 @@ namespace TabletBot.Discord.Commands
         [Command(SHOW_SNIPPET, RunMode = RunMode.Async), Name("Show snippet")]
         public async Task ShowSnippet(string prefix)
         {
-            await Context.Message!.DeleteAsync();
-
-            if (SnippetEmbeds.TryGetSnippetEmbed(_settings, prefix, out var embed))
-            {
-                await ReplyAsync(embed: embed.Build());
-            }
-            else
-            {
-                var message = await ReplyAsync(embed: embed.Build(), messageReference: Context.Message.Reference);
-                message.DeleteDelayed(_settings.DeleteDelay);
-            }
+            SnippetEmbeds.GetSnippetEmbed(_settings, prefix, out var embed);
+            await ReplyAsync(embed: embed.Build());
         }
 
         [Command(LIST_SNIPPETS, RunMode = RunMode.Async), Name("List snippets")]
         public async Task ListSnippets()
         {
-            await Context.Message?.DeleteAsync();
-
+            EmbedBuilder embed;
             if (Snippets.Any())
             {
-                var embed = new EmbedBuilder
+                embed = new EmbedBuilder
                 {
+                    Color = Color.Teal,
                     Title = "Snippets"
                 };
 
@@ -66,28 +59,23 @@ namespace TabletBot.Discord.Commands
                         "   " + snippet.Title
                     );
                 }
-
-                await ReplyAsync(embed: embed.Build());
             }
             else
             {
-                var embed = new EmbedBuilder
+                embed = new EmbedBuilder
                 {
                     Color = Color.Magenta,
                     Title = "Snippets",
                     Description = "No snippets have been created."
                 };
-
-                var message = await ReplyAsync(embed: embed.Build());
-                message.DeleteDelayed(_settings.DeleteDelay);
             }
+
+            await ReplyAsync(embed: embed.Build());
         }
 
         [Command(SET_SNIPPET, RunMode = RunMode.Async), Name("Create snippet"), RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task SetSnippet(string prefix, string title, [Remainder] string content)
         {
-            await Context.Message!.DeleteAsync();
-
             if (Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore store)
             {
                 // Update the existing snippet
@@ -100,16 +88,23 @@ namespace TabletBot.Discord.Commands
                 store = new SnippetStore(prefix, title, content);
                 Snippets.Add(store);
             }
+
             await _settings.Overwrite();
             _snippetSlashCommands.OnUpdate();
-            await ReplyAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
+
+            var embed = new EmbedBuilder
+            {
+                Title = store.Title,
+                Color = Color.Magenta,
+                Description = store.Content
+            };
+
+            await ReplyAsync(embed: embed.Build());
         }
 
         [Command(REMOVE_SNIPPET, RunMode = RunMode.Async), Name("Delete snippet"), RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task RemoveSnippet(string prefix)
         {
-            await Context.Message!.DeleteAsync();
-
             EmbedBuilder result;
 
             if (Snippets.FirstOrDefault(t => t.Snippet == prefix) is SnippetStore snippet)
@@ -141,8 +136,7 @@ namespace TabletBot.Discord.Commands
                 };
             }
 
-            var message = await ReplyAsync(embed: result.Build());
-            message.DeleteDelayed(_settings.DeleteDelay);
+            await ReplyAsync(embed: result.Build());
         }
 
         [Command(EXPORT_SNIPPET, RunMode = RunMode.Async), Name("Export snippet")]
@@ -161,15 +155,14 @@ namespace TabletBot.Discord.Commands
             }
             else
             {
-                var result = new EmbedBuilder
+                var embed = new EmbedBuilder
                 {
                     Color = Color.Red,
                     Title = "Failed to export snippet",
                     Description = "The snippet was not found."
                 };
 
-                var message = await ReplyAsync(embed : result.Build());
-                message.DeleteDelayed(_settings.DeleteDelay);
+                await ReplyAsync(embed: embed.Build());
             }
         }
     }

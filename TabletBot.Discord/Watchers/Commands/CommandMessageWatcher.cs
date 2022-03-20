@@ -5,7 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using TabletBot.Common;
-using TabletBot.Discord.Commands;
 
 namespace TabletBot.Discord.Watchers.Commands
 {
@@ -88,7 +87,7 @@ namespace TabletBot.Discord.Watchers.Commands
                     _ => await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}")
                 };
 
-                DiscordExtensions.DeleteAllDelayed(_settings.DeleteDelay, context.Message, msg);
+                DiscordExtensions.DeleteAllDelayed(5000, context.Message, msg);
             }
         }
     }
