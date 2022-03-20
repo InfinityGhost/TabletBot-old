@@ -231,13 +231,16 @@ namespace TabletBot.Discord.SlashCommands
                 return new List<ApplicationCommandOptionChoiceProperties>();
             }
 
-            return _settings.Snippets.Select(s =>
-                new ApplicationCommandOptionChoiceProperties
+            var query = from snippet in _settings.Snippets
+                let option = new ApplicationCommandOptionChoiceProperties
                 {
-                    Name = $"{s.Snippet}: {s.Title}",
-                    Value = s.Snippet
+                    Name = $"{snippet.Snippet}: {snippet.Title}",
+                    Value = snippet.Snippet
                 }
-            ).ToList();
+                orderby option.Name
+                select option;
+
+            return query.ToList();
         }
     }
 }
