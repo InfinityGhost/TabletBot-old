@@ -39,7 +39,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = SHOW_SNIPPET,
                     Description = "Shows a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -64,7 +64,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = SET_SNIPPET,
                     Description = "Sets a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -102,7 +102,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = REMOVE_SNIPPET,
                     Description = "Removes a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -124,7 +124,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = EXPORT_SNIPPET,
                     Description = "Exports a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -234,7 +234,7 @@ namespace TabletBot.Discord.SlashCommands
             return _settings.Snippets.Select(s =>
                 new ApplicationCommandOptionChoiceProperties
                 {
-                    Name = s.Title,
+                    Name = $"{s.Snippet}: {s.Title}",
                     Value = s.Snippet
                 }
             ).ToList();
