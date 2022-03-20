@@ -36,7 +36,7 @@ namespace TabletBot.Discord.Watchers.Commands
 
         public async Task Receive(IMessage message)
         {
-            if (message.Content.StartsWith(_settings.CommandPrefix))
+            if (message.Content.StartsWith(_settings.CommandPrefix) && !message.Author.IsBot)
             {
                 try
                 {
