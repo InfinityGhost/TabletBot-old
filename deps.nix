@@ -6,6 +6,7 @@
   (fetchNuGet { pname = "Discord.Net.Labs.Rest"; version = "3.6.1"; sha256 = "1097f3n3pv893lp5v86n90jcig9i5gi24s5z9726xvxqvyasjv2q"; })
   (fetchNuGet { pname = "Discord.Net.Labs.Webhook"; version = "3.6.1"; sha256 = "1g5hdx37mfygb9j5m7wwf9d2l52kqilaxvsv8j605yhily56vy8n"; })
   (fetchNuGet { pname = "Discord.Net.Labs.WebSocket"; version = "3.6.1"; sha256 = "1igl11l7jp742mqrzlxkamv6x0hzpwclkbn96cwwljx2yqyx2z7k"; })
+  (fetchNuGet { pname = "JetBrains.Annotations"; version = "2021.3.0"; sha256 = "01ssylllbwpana2w3iybi533zlvcsbhzjc8kr0g4kg307kjbfn8v"; })
   (fetchNuGet { pname = "Microsoft.AspNetCore.App.Ref"; version = "5.0.0"; sha256 = "0d7sjr89zwq0wxirf8la05hfalv9nhvlczg1c7a508k8aw79jvfg"; })
   (fetchNuGet { pname = "Microsoft.CSharp"; version = "4.4.1"; sha256 = "0z6d1i6xcf0c00z6rs75rgw4ncs9q2m8amasf6mmbf40fm02ry7g"; })
   (fetchNuGet { pname = "Microsoft.Extensions.DependencyInjection"; version = "6.0.0"; sha256 = "1wlhb2vygzfdjbdzy7waxblmrx0q3pdcqvpapnpmq9fcx5m8r6w1"; })
