@@ -3,10 +3,12 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using TabletBot.Common;
+using TabletBot.Discord.Commands.Attributes;
 
 namespace TabletBot.Discord.Commands
 {
-    public class ModerationCommands : ModuleBase
+    [Module]
+    public class ModerationCommands : CommandModule
     {
         private readonly Bot _bot;
         private readonly Settings _settings;
@@ -22,14 +24,17 @@ namespace TabletBot.Discord.Commands
         {
             await Context.Message.DeleteAsync();
             var messages = await Context.Channel.GetMessagesAsync(count).FlattenAsync();
-            await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages);
+            if (Context.Channel is ITextChannel textChannel)
+                await textChannel.DeleteMessagesAsync(messages);
+            else
+                await ReplyAsync("Unable to delete messages as the current channel is not a text channel.");
         }
 
         [Command("save", RunMode = RunMode.Async), Name("Force Save"), RequireOwner]
         public async Task ForceSaveSettings()
         {
-            await Context.Message.DeleteAsync();
             await _settings.Write(Platform.SettingsFile);
+            await ReplyAsync("Settings force saved.", allowedMentions: AllowedMentions.None);
             await Log.WriteAsync("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {Platform.SettingsFile.FullName}");
         }
 
@@ -44,32 +49,8 @@ namespace TabletBot.Discord.Commands
         [Command("set-prefix", RunMode = RunMode.Async), Name("Set prefix"), RequireOwner]
         public async Task SetPrefix([Remainder] string prefix)
         {
-            await Context.Message.DeleteAsync();
             _settings.CommandPrefix = prefix;
-            var message = await ReplyAsync(string.Format("Set the command prefix to `{0}`.", _settings.CommandPrefix));
-            message.DeleteDelayed(_settings.DeleteDelay);
-        }
-
-        [Command("set-reply-delete-delay", RunMode = RunMode.Async), Name("Set bot reply delete delay"), RequireOwner]
-        public async Task SetReplyDeleteDelay(TimeSpan delay)
-        {
-            await Context.Message.DeleteAsync();
-            _settings.DeleteDelay = (int)delay.TotalMilliseconds;
-            
-            var embed = new EmbedBuilder
-            {
-                Title = "Set message delay",
-                Fields =
-                {
-                    new EmbedFieldBuilder
-                    {
-                        Name = "Delay",
-                        Value = _settings.DeleteDelay
-                    }
-                }
-            };
-            var message = await ReplyAsync(embed: embed.Build());
-            message.DeleteDelayed(_settings.DeleteDelay);
+            await ReplyAsync($"Set the command prefix to `{_settings.CommandPrefix}`.");
         }
     }
 }

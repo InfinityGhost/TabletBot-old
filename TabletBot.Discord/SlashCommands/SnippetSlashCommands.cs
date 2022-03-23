@@ -39,7 +39,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = SHOW_SNIPPET,
                     Description = "Shows a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -64,7 +64,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = SET_SNIPPET,
                     Description = "Sets a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -102,7 +102,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = REMOVE_SNIPPET,
                     Description = "Removes a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -124,7 +124,7 @@ namespace TabletBot.Discord.SlashCommands
                 {
                     Name = EXPORT_SNIPPET,
                     Description = "Exports a snippet",
-                    Options = new List<SlashCommandOptionBuilder>()
+                    Options = new List<SlashCommandOptionBuilder>
                     {
                         new SlashCommandOptionBuilder
                         {
@@ -143,7 +143,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
 
-            if (SnippetEmbeds.TryGetSnippetEmbed(_settings, snippet, out var embed))
+            if (SnippetEmbeds.GetSnippetEmbed(_settings, snippet, out var embed))
                 await command.FollowupAsync(embed: embed.Build(), ephemeral: false);
             else
                 await command.FollowupAsync("Could not find snippet");
@@ -170,7 +170,12 @@ namespace TabletBot.Discord.SlashCommands
 
             await _settings.Overwrite();
             OnUpdate();
-            await command.FollowupAsync(embed: SnippetEmbeds.GetSnippetEmbed(store).Build());
+            await command.FollowupAsync(embed: new EmbedBuilder
+            {
+                Title = store.Title,
+                Color = Color.Magenta,
+                Description = store.Content
+            }.Build());
         }
 
         private async Task RemoveSnippet(SocketSlashCommand command)
@@ -226,13 +231,16 @@ namespace TabletBot.Discord.SlashCommands
                 return new List<ApplicationCommandOptionChoiceProperties>();
             }
 
-            return _settings.Snippets.Select(s =>
-                new ApplicationCommandOptionChoiceProperties
+            var query = from snippet in _settings.Snippets
+                let option = new ApplicationCommandOptionChoiceProperties
                 {
-                    Name = s.Title,
-                    Value = s.Snippet
+                    Name = $"{snippet.Snippet}: {snippet.Title}",
+                    Value = snippet.Snippet
                 }
-            ).ToList();
+                orderby option.Name
+                select option;
+
+            return query.ToList();
         }
     }
 }

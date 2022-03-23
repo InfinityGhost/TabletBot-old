@@ -1,10 +1,7 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using Discord.WebSocket;
 using TabletBot.Common;
-using TabletBot.Common.Store;
 using TabletBot.Discord.Commands;
 using TabletBot.Discord.Embeds;
 

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
@@ -15,7 +14,6 @@ namespace TabletBot.Common
         private const ulong MODERATOR_ROLE_ID = 644180151755735060;
         private const ulong MUTED_ROLE_ID = 715342682293010452;
 
-        public int DeleteDelay { set; get; } = 5000;
         public ulong GuildID { set; get; } = MAIN_GUILD_ID;
         public ulong LogMessageChannelID { set; get; } = LOG_MESSAGE_CHANNEL_ID;
         public ulong ModeratorRoleID { set; get; } = MODERATOR_ROLE_ID;

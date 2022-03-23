@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using TabletBot.Common;
+using TabletBot.Discord.Commands.Attributes;
 
 namespace TabletBot.Discord.Commands
 {
+    [Module]
     public class HelpCommands : CommandModule
     {
         private readonly Settings _settings;
@@ -29,7 +31,6 @@ namespace TabletBot.Discord.Commands
         [Command("help", RunMode = RunMode.Async), Name("Help"), Summary("Lists all commands available.")]
         public async Task ListCommands()
         {
-            await Context.Message.DeleteAsync();
             var message = await ReplyAsync("Fetching help...");
 
             IEnumerable<ModuleInfo> modules =

@@ -1,6 +1,4 @@
 using System.Linq;
-using TabletBot.Common;
-using TabletBot.Discord;
 
 namespace TabletBot
 {
