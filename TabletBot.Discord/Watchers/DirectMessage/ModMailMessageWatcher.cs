@@ -32,11 +32,10 @@ namespace TabletBot.Discord.Watchers.DirectMessage
 
                 var embed = new EmbedBuilder
                 {
-                    Title = $"Direct Message: {dmChannel.Recipient}",
                     Description = message.Content,
                     Timestamp = message.Timestamp,
                     Author = dmChannel.Recipient.ToEmbedAuthor(),
-                    Color = Color.Teal
+                    Color = Color.Blue
                 };
 
                 await _directMessageLogChannel.SendMessageAsync(embed: embed.Build());
