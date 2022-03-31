@@ -7,6 +7,7 @@ using TabletBot.Discord.Commands;
 using TabletBot.Discord.SlashCommands;
 using TabletBot.Discord.Watchers;
 using TabletBot.Discord.Watchers.Commands;
+using TabletBot.Discord.Watchers.DirectMessage;
 using TabletBot.Discord.Watchers.GitHub;
 using TabletBot.Discord.Watchers.ReactionRoles;
 using TabletBot.Discord.Watchers.Spam;
@@ -32,6 +33,7 @@ namespace TabletBot.Discord
                 .AddMessageWatcher<CommandMessageWatcher>()
                 .AddMessageWatcher<IssueMessageWatcher>()
                 .AddMessageWatcher<SpamMessageWatcher>()
+                .AddMessageWatcher<ModMailMessageWatcher>()
                 // Reaction watchers
                 .AddReactionWatcher<RoleReactionWatcher>()
                 // Interaction watchers
