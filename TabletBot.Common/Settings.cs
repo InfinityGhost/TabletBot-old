@@ -11,11 +11,13 @@ namespace TabletBot.Common
     {
         private const ulong MAIN_GUILD_ID = 615607687467761684;
         private const ulong LOG_MESSAGE_CHANNEL_ID = 715344685853442198;
+        private const ulong MOD_MAIL_CHANNEL_ID = 958916136966193182;
         private const ulong MODERATOR_ROLE_ID = 644180151755735060;
         private const ulong MUTED_ROLE_ID = 715342682293010452;
 
         public ulong GuildID { set; get; } = MAIN_GUILD_ID;
         public ulong LogMessageChannelID { set; get; } = LOG_MESSAGE_CHANNEL_ID;
+        public ulong ModMailChannelID { set; get; } = MOD_MAIL_CHANNEL_ID;
         public ulong ModeratorRoleID { set; get; } = MODERATOR_ROLE_ID;
         public ulong MutedRoleID { set; get; } = MUTED_ROLE_ID;
         public string CommandPrefix { set; get; } = "!";
@@ -30,7 +32,7 @@ namespace TabletBot.Common
         [JsonIgnore]
         public bool RunAsUnit { set; get; } = false;
 
-        private static readonly JsonSerializerOptions options = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
         {
             WriteIndented = true
         };
@@ -39,21 +41,21 @@ namespace TabletBot.Common
         {
             if (!file.Directory.Exists)
                 file.Directory.Create();
-            using (var fs = file.Create())
-                await JsonSerializer.SerializeAsync<Settings>(fs, this, options);
+            await using (var fs = file.Create())
+                await JsonSerializer.SerializeAsync<Settings>(fs, this, SerializerOptions);
         }
 
         public static async Task<Settings> Read(FileInfo file)
         {
-            using (var fs = file.OpenRead())
+            await using (var fs = file.OpenRead())
                 return await JsonSerializer.DeserializeAsync<Settings>(fs);
         }
 
         public async Task<string> ExportAsync()
         {
-            using (var ms = new MemoryStream())
+            await using (var ms = new MemoryStream())
             {
-                await JsonSerializer.SerializeAsync<Settings>(ms, this, options);
+                await JsonSerializer.SerializeAsync<Settings>(ms, this, SerializerOptions);
                 ms.Position = 0;
                 using (var sr = new StreamReader(ms))
                     return await sr.ReadToEndAsync();
