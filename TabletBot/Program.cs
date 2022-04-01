@@ -58,7 +58,7 @@ namespace TabletBot
             DiscordClient = new DiscordSocketClient(config);
             var gitHubClient = await AuthenticateGitHub(githubToken);
 
-            var serviceCollection = BotServiceCollection.Build(Settings, DiscordClient, gitHubClient);
+            var serviceCollection = BotServiceCollection.Build(Settings, DiscordClient, gitHubClient!);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             Bot = serviceProvider.GetRequiredService<Bot>();

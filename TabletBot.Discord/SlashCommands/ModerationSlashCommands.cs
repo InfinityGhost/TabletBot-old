@@ -170,7 +170,7 @@ namespace TabletBot.Discord.SlashCommands
             var amount = (int)command.GetValue<long>("amount", 1);
 
             var messages = await command.Channel.GetMessagesAsync(amount).FlattenAsync();
-            await (command.Channel as ITextChannel).DeleteMessagesAsync(messages);
+            await (command.Channel as ITextChannel)!.DeleteMessagesAsync(messages);
             await command.FollowupAsync($"Deleted {amount} messages.");
         }
 
@@ -198,7 +198,7 @@ namespace TabletBot.Discord.SlashCommands
             var userId = command.GetValue<ulong>("user");
             var reason = command.GetValue<string>("reason");
 
-            var user = await (command.Channel as IGuildChannel).GetUserAsync(userId);
+            var user = await (command.Channel as IGuildChannel)!.GetUserAsync(userId);
 
             if (user is IGuildUser)
             {

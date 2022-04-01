@@ -8,7 +8,7 @@ namespace TabletBot.Discord.SlashCommands
 {
     public abstract class SlashCommandModule
     {
-        public event Func<SlashCommandModule, Task> Update;
+        public event Func<SlashCommandModule, Task>? Update;
 
         public void OnUpdate() => Update?.Invoke(this);
 
@@ -23,7 +23,7 @@ namespace TabletBot.Discord.SlashCommands
             }
         }
 
-        public IList<SlashCommand> CommandHandlers { set; get; }
+        public IList<SlashCommand> CommandHandlers { set; get; } = Array.Empty<SlashCommand>();
 
         protected abstract IEnumerable<SlashCommand> GetSlashCommands();
 

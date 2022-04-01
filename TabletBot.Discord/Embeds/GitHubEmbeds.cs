@@ -26,13 +26,13 @@ namespace TabletBot.Discord.Embeds
         {
             var embed = new EmbedBuilder
             {
-                Title = string.Format("{0} #{1}", pr.Title, pr.Number),
+                Title = $"{pr.Title} #{pr.Number}",
                 Timestamp = pr.UpdatedAt,
                 Url = pr.HtmlUrl,
                 Footer = new EmbedFooterBuilder
                 {
-                    Text = string.Format("{0} opened this pull request on {1}", pr.User?.Login, pr.CreatedAt),
-                    IconUrl = pr.User.AvatarUrl
+                    Text = $"{pr.User?.Login} opened this pull request on {pr.CreatedAt}",
+                    IconUrl = pr.User?.AvatarUrl
                 },
                 Description = pr.Body ?? string.Empty
             };

@@ -9,15 +9,15 @@ namespace TabletBot.Discord.Commands
     public class CommandModule : ModuleBase
     {
         protected override Task<IUserMessage> ReplyAsync(
-            string message = null,
+            string? message = null,
             bool isTTS = false,
-            Embed embed = null,
-            RequestOptions options = null,
-            AllowedMentions allowedMentions = null,
-            MessageReference messageReference = null,
-            MessageComponent components = null,
-            ISticker[] stickers = null,
-            Embed[] embeds = null
+            Embed? embed = null,
+            RequestOptions? options = null,
+            AllowedMentions? allowedMentions = null,
+            MessageReference? messageReference = null,
+            MessageComponent? components = null,
+            ISticker[]? stickers = null,
+            Embed[]? embeds = null
         )
         {
             messageReference ??= Context.Message.ToReference();

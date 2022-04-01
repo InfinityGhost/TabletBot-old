@@ -153,7 +153,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
             var title = command.GetValue<string>("title");
-            var content = command.GetValue<string>("content").Replace(@"\n", Environment.NewLine);
+            var content = command.GetValue<string>("content")?.Replace(@"\n", Environment.NewLine);
 
             if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
             {
