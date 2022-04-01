@@ -38,6 +38,9 @@ namespace TabletBot.Discord.SlashCommands
         {
             var tablet = command.GetValue<string>("tablet");
             var user = command.User as IGuildUser;
+
+            if (user is not IGuildUser)
+                return;
             
             if (tablet != null)
             {

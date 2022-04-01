@@ -42,7 +42,7 @@ namespace TabletBot.Discord.Watchers
         public static T FirstOfType<TSource, T>(this IEnumerable<TSource> enumerable)
             where T : class, TSource
         {
-            return enumerable.First(i => i is T) as T;
+            return (T)enumerable.First(i => i is T)!;
         }
 
         public static IEnumerable<Type> OfType<T>(this IEnumerable<Type> types)

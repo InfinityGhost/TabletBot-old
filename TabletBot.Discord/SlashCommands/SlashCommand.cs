@@ -8,21 +8,20 @@ namespace TabletBot.Discord.SlashCommands
 {
     public class SlashCommand
     {
-        public string Name { set; get; }
-        public SlashCommandBuilder Builder { set; get; }
-        public Func<SocketSlashCommand, Task> Handler { set; get; }
+        public string Name { set; get; } = string.Empty;
+        public SlashCommandBuilder? Builder { set; get; }
+        public Func<SocketSlashCommand, Task> Handler { set; get; } = _ => Task.CompletedTask;
         public GuildPermissions? MinimumPermissions { set; get; }
         public bool Ephemeral { set; get; }
 
-        public SlashCommandProperties Build() => Builder.Build();
+        public SlashCommandProperties Build() => Builder!.Build();
 
         public async Task Invoke(SocketSlashCommand command)
         {
             await command.DeferAsync(Ephemeral);
-            if (MinimumPermissions is GuildPermissions permissions)
+            if (MinimumPermissions != null)
             {
-                var user = command.User as IGuildUser;
-                if (HasCorrectPermissions(user))
+                if (command.User as IGuildUser is IGuildUser user && HasCorrectPermissions(user))
                 {
                     await Handler(command);
                 }
@@ -39,7 +38,7 @@ namespace TabletBot.Discord.SlashCommands
 
         private bool HasCorrectPermissions(IGuildUser user)
         {
-            var guildPermissions = MinimumPermissions.Value;
+            var guildPermissions = MinimumPermissions!.Value;
             var userPermissions = user.GuildPermissions;
 
             return userPermissions.Administrator ||
