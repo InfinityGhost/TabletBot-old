@@ -81,7 +81,7 @@ namespace TabletBot
         public static async void SaveSettings(params string[] args)
         {
             await Settings!.Write(Platform.SettingsFile);
-            await Log.WriteAsync("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
+            Log.Write("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
         }
     }
 }

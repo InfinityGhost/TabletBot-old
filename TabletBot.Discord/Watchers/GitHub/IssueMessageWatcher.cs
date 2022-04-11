@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -7,6 +6,7 @@ using Discord;
 using Octokit;
 using TabletBot.Common;
 using TabletBot.Discord.Embeds;
+using TabletBot.Discord.Commands;
 
 #nullable enable
 
@@ -26,49 +26,55 @@ namespace TabletBot.Discord.Watchers.GitHub
         private const string OWNER = "OpenTabletDriver";
         private const string NAME = "OpenTabletDriver";
 
+        private static readonly Regex IssueRefRegex = new Regex(@" ?#([0-9]+[0-9]) ?");
+
         public async Task Receive(IMessage message)
         {
-            if (message.Author.IsBot)
+            if (message.Author.IsBot || message is not IUserMessage userMessage)
                 return;
 
-            if (TryGetIssueRefNumbers(message.Content, out var refs))
-            {
-                uint refNum = 0;
-                foreach (int issueRef in refs)
-                {
-                    if (refNum == _settings.GitHubIssueRefLimit)
-                        break;
+            var rateLimits = await _gitHubClient.Miscellaneous.GetRateLimits();
+            if (rateLimits.Rate.Remaining < 2)
+                return;
 
-                    var issues = await _gitHubClient.Issue.GetAllForRepository(OWNER, NAME);
-                    var prs = await _gitHubClient.PullRequest.GetAllForRepository(OWNER, NAME);
-                    if (issues.FirstOrDefault(i => i.Number == issueRef) is Issue issue)
-                    {
-                        var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);
-                        var embed = pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
-                        await message.Channel.SendMessageAsync(embed: embed);
-                    }
-                    refNum++;
+            if (GetIssueRefNumbers(userMessage.Content) is IList<uint> refs)
+            {
+                using (userMessage.Channel.EnterTypingState())
+                {
+                    await ReplyWithEmbeds(userMessage, refs);
                 }
             }
         }
 
         public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
 
-        public static bool TryGetIssueRefNumbers(string message, out IEnumerable<int> refNums)
+        private async Task ReplyWithEmbeds(IUserMessage message, IList<uint> refs)
         {
-            refNums = Array.Empty<int>();
+            var issues = await _gitHubClient.Issue.GetAllForRepository(OWNER, NAME);
+            var prs = await _gitHubClient.PullRequest.GetAllForRepository(OWNER, NAME);
+            var embeds = GetEmbedsForRefs(issues, prs, refs).ToArray();
 
-            var matches = IssueRefRegex.Matches(message);
-            if (matches.Count > 0)
-            {
-                refNums = from match in matches
-                    select int.Parse(match.Groups[1].Value);
-                return true;
-            }
-
-            return false;
+            await message.Channel.SendMessageAsync(embeds: embeds, messageReference: message.ToReference());
         }
 
-        private static readonly Regex IssueRefRegex = new Regex(@" ?#([0-9]+[0-9]) ?");
+        private IEnumerable<Embed> GetEmbedsForRefs(IReadOnlyList<Issue> issues, IReadOnlyList<PullRequest> prs, IList<uint> refs)
+        {
+            for (var i = 0; i < refs.Count && i < _settings.GitHubIssueRefLimit; i++)
+            {
+                var issueRef = refs[i];
+
+                if (issues.FirstOrDefault(s => s.Number == issueRef) is Issue issue)
+                {
+                    var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);
+                    yield return pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
+                }
+            }
+        }
+
+        private static IEnumerable<uint>? GetIssueRefNumbers(string message)
+        {
+            var matches = IssueRefRegex.Matches(message);
+            return matches.Any() ? matches.Select(m => uint.Parse(m.Groups[1].Value)).ToList() : null;
+        }
     }
 }

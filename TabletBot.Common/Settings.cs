@@ -39,10 +39,10 @@ namespace TabletBot.Common
 
         public async Task Write(FileInfo file)
         {
-            if (!file.Directory.Exists)
+            if (file.Directory is { Exists: false })
                 file.Directory.Create();
             await using (var fs = file.Create())
-                await JsonSerializer.SerializeAsync<Settings>(fs, this, SerializerOptions);
+                await JsonSerializer.SerializeAsync(fs, this, SerializerOptions);
         }
 
         public static async Task<Settings> Read(FileInfo file)
@@ -55,7 +55,7 @@ namespace TabletBot.Common
         {
             await using (var ms = new MemoryStream())
             {
-                await JsonSerializer.SerializeAsync<Settings>(ms, this, SerializerOptions);
+                await JsonSerializer.SerializeAsync(ms, this, SerializerOptions);
                 ms.Position = 0;
                 using (var sr = new StreamReader(ms))
                     return await sr.ReadToEndAsync();
