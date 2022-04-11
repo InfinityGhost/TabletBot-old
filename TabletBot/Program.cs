@@ -56,7 +56,7 @@ namespace TabletBot
 
             var config = new DiscordSocketConfig();
             DiscordClient = new DiscordSocketClient(config);
-            var gitHubClient = await AuthenticateGitHub(githubToken);
+            var gitHubClient = AuthenticateGitHub(githubToken);
 
             var serviceCollection = BotServiceCollection.Build(Settings, DiscordClient, gitHubClient!);
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -73,19 +73,19 @@ namespace TabletBot
                 else
                 {
                     var commandArgs = IO.ReadLine().Split(' ');
-                    await InvokeCommand(commandArgs);
+                    InvokeCommand(commandArgs);
                 }
             }
             await Bot.Logout();
             Console.WriteLine();
         }
 
-        private static async Task InvokeCommand(string[] args)
+        private static void InvokeCommand(string[] args)
         {
             try
             {
                 if (!CommandCollection.Current.Invoke(args))
-                    await Log.WriteAsync("Terminal", $"Invalid command: '{args[0]}'. Execute help for a list of commands.");
+                    Log.Write("Terminal", $"Invalid command: '{args[0]}'. Execute help for a list of commands.");
             }
             catch (Exception ex)
             {
@@ -93,7 +93,7 @@ namespace TabletBot
             }
         }
 
-        private static async Task<GitHubClient?> AuthenticateGitHub(string token)
+        private static GitHubClient? AuthenticateGitHub(string token)
         {
             if (!string.IsNullOrWhiteSpace(token))
             {
@@ -105,7 +105,7 @@ namespace TabletBot
                         Credentials = new Credentials(token)
                     };
 
-                    await Log.WriteAsync("GitHub", "Authenticated client.");
+                    Log.Write("GitHub", "Authenticated client.");
                     return githubClient;
                 }
                 catch (Exception ex)
@@ -115,7 +115,7 @@ namespace TabletBot
             }
             else
             {
-                await Log.WriteAsync("GitHub", "API was not authenticated.", LogLevel.Warning);
+                Log.Write("GitHub", "API was not authenticated.", LogLevel.Warning);
             }
 
             return null;

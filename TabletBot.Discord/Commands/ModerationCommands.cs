@@ -35,7 +35,7 @@ namespace TabletBot.Discord.Commands
         {
             await _settings.Write(Platform.SettingsFile);
             await ReplyAsync("Settings force saved.", allowedMentions: AllowedMentions.None);
-            await Log.WriteAsync("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {Platform.SettingsFile.FullName}");
+            Log.Write("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {Platform.SettingsFile.FullName}");
         }
 
         [Command("kill-bot", RunMode = RunMode.Async), Name("Kill Bot"), RequireOwner]

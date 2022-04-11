@@ -1,3 +1,5 @@
+using Discord;
+
 namespace TabletBot.Discord
 {
     public static class Formatting
@@ -8,5 +10,7 @@ namespace TabletBot.Discord
         public const string CODE_AFFIX = "`";
         public const string QUOTE_PREFIX = "> ";
         public const string CODE_BLOCK = "```";
+
+        public static string UrlString(IAttachment attachment) => $"[{attachment.Filename}]({attachment.Url})";
     }
 }

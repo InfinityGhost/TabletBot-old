@@ -35,7 +35,7 @@ namespace TabletBot.Discord.Watchers.Commands
 
         public async Task Receive(IMessage message)
         {
-            if (message.Content.StartsWith(_settings.CommandPrefix) && !message.Author.IsBot)
+            if (message.Channel is IGuildChannel && !message.Author.IsBot && message.Content.StartsWith(_settings.CommandPrefix))
             {
                 try
                 {
@@ -70,7 +70,7 @@ namespace TabletBot.Discord.Watchers.Commands
             foreach (var module in _commands)
             {
                 await _commandService.AddModuleAsync(module, _serviceProvider);
-                await Log.WriteAsync("CommandSvc", $"Registered command module '{module.Name}'.", LogLevel.Debug);
+                Log.Write("CommandSvc", $"Registered command module '{module.Name}'.", LogLevel.Debug);
             }
 
             _commandService.CommandExecuted += CommandExecuted;

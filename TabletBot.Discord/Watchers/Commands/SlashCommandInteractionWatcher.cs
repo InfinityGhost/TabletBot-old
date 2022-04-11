@@ -64,16 +64,14 @@ namespace TabletBot.Discord.Watchers.Commands
             if (_registered)
                 return;
 
-            await Task.WhenAll(_commands.Select(RegisterCommand));
+            await Task.WhenAll(_commands.Select(RegisterCommandModule));
             _registered = true;
         }
 
-        private async Task RegisterCommand(SlashCommandModule module)
+        private async Task RegisterCommandModule(SlashCommandModule module)
         {
-            module.BuildCommandHandlers();
-
             var moderatorCommands = new List<RestGuildCommand>();
-            foreach (var command in module.CommandHandlers)
+            foreach (var command in module.BuildCommandHandlers())
             {
                 var guildCommand = await _client.Rest.CreateGuildCommand(command.Build(), _settings.GuildID);
                 if (guildCommand.IsDefaultPermission == false)
@@ -81,8 +79,9 @@ namespace TabletBot.Discord.Watchers.Commands
             }
 
             await ApplyCommandPermissions(_client, moderatorCommands);
-
             module.Update += UpdateModule;
+
+            Log.Write("Setup", $"Registered slash command module '{module.GetType().Name}'.");
         }
 
         private async Task ApplyCommandPermissions(DiscordSocketClient client, IEnumerable<RestGuildCommand> moderatorCommands)
