@@ -146,12 +146,7 @@ namespace TabletBot.Discord.Commands
 
             if (Snippets.FirstOrDefault(s => s.Snippet == prefix) is SnippetStore snippet)
             {
-                var sb = new StringBuilder();
-                sb.AppendLine(Formatting.CODE_BLOCK);
-                sb.AppendLine(snippet.Content);
-                sb.AppendLine(Formatting.CODE_BLOCK);
-
-                await ReplyAsync(sb.ToString());
+                await ReplyAsync(Formatting.CodeBlock(snippet.Content));
             }
             else
             {
