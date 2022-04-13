@@ -215,10 +215,8 @@ namespace TabletBot.Discord.SlashCommands
             if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(Formatting.CODE_AFFIX + store.Title + Formatting.CODE_AFFIX);
-                sb.AppendLine(Formatting.CODE_BLOCK);
-                sb.AppendLine(store.Content.Replace(Environment.NewLine, @"\n"));
-                sb.AppendLine(Formatting.CODE_BLOCK);
+                sb.AppendLine(Formatting.CodeString(store.Title));
+                sb.AppendLine(Formatting.CodeBlock(store.Content.Replace(Environment.NewLine, @"\n")));
 
                 await command.FollowupAsync(sb.ToString());
             }

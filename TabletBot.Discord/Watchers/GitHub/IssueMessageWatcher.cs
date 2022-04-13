@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -50,25 +52,17 @@ namespace TabletBot.Discord.Watchers.GitHub
 
         private async Task ReplyWithEmbeds(IUserMessage message, IList<uint> refs)
         {
-            var issues = await _gitHubClient.Issue.GetAllForRepository(OWNER, NAME);
-            var prs = await _gitHubClient.PullRequest.GetAllForRepository(OWNER, NAME);
-            var embeds = GetEmbedsForRefs(issues, prs, refs).ToArray();
+            var embeds = new Embed[refs.Count];
 
-            await message.Channel.SendMessageAsync(embeds: embeds, messageReference: message.ToReference());
-        }
-
-        private IEnumerable<Embed> GetEmbedsForRefs(IReadOnlyList<Issue> issues, IReadOnlyList<PullRequest> prs, IList<uint> refs)
-        {
             for (var i = 0; i < refs.Count && i < _settings.GitHubIssueRefLimit; i++)
             {
-                var issueRef = refs[i];
+                var issueRef = (int)refs[i];
+                var issue = await _gitHubClient.Issue.Get(OWNER, NAME, issueRef);
 
-                if (issues.FirstOrDefault(s => s.Number == issueRef) is Issue issue)
-                {
-                    var pr = prs.FirstOrDefault(pr => pr.Number == issue.Number);
-                    yield return pr == null ? GitHubEmbeds.GetIssueEmbed(issue) : GitHubEmbeds.GetPullRequestEmbed(pr);
-                }
+                embeds[i] = GitHubEmbeds.GetEmbed(issue).Build();
             }
+
+            await message.Channel.SendMessageAsync(embeds: embeds.ToArray(), messageReference: message.ToReference());
         }
 
         private static IEnumerable<uint>? GetIssueRefNumbers(string message)

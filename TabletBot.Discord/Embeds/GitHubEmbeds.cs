@@ -1,42 +1,75 @@
-﻿using Discord;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Discord;
 using Octokit;
 
 namespace TabletBot.Discord.Embeds
 {
     public static class GitHubEmbeds
     {
-        public static Embed GetIssueEmbed(Issue issue)
+        private const uint OPEN_COLOR = 0x238636;
+        private const uint RESOLVED_COLOR = 0x8957e5;
+        private const uint CLOSED_COLOR = 0xda3633;
+
+        public static EmbedBuilder GetEmbed(Issue? issue)
         {
-            var embed = new EmbedBuilder
+            if (issue == null)
             {
-                Title = string.Format("{0} #{1}", issue.Title, issue.Number),
-                Timestamp = issue.CreatedAt,
-                Url = issue.HtmlUrl,
-                Footer = new EmbedFooterBuilder
+                return new EmbedBuilder()
                 {
-                    Text = string.Format("{0} opened this issue on {1}", issue.User.Login, issue.CreatedAt),
+                    Color = CLOSED_COLOR,
+                    Description = "No issue or pull request was found."
+                };
+            }
+
+            return new EmbedBuilder
+            {
+                Title = $"{issue.Title} #{issue.Number}",
+                Url = issue.HtmlUrl,
+                Description = issue.Body ?? string.Empty,
+                Color = GetColor(issue),
+                Fields = GetFields(issue).ToList(),
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = issue.User.Login,
+                    Url = issue.User.HtmlUrl,
                     IconUrl = issue.User.AvatarUrl
-                },
-                Description = issue.Body
+                }
             };
-            return embed.Build();
         }
 
-        public static Embed GetPullRequestEmbed(PullRequest pr)
+        private static uint GetColor(Issue issue)
         {
-            var embed = new EmbedBuilder
+            if (issue.ClosedAt == null)
+                return OPEN_COLOR;
+
+            if (issue.PullRequest != null)
+                return issue.PullRequest.Merged ? RESOLVED_COLOR : CLOSED_COLOR;
+
+            return RESOLVED_COLOR;
+        }
+
+        private static IEnumerable<EmbedFieldBuilder> GetFields(Issue issue)
+        {
+            if (issue.Milestone != null)
             {
-                Title = $"{pr.Title} #{pr.Number}",
-                Timestamp = pr.UpdatedAt,
-                Url = pr.HtmlUrl,
-                Footer = new EmbedFooterBuilder
+                yield return new EmbedFieldBuilder
                 {
-                    Text = $"{pr.User?.Login} opened this pull request on {pr.CreatedAt}",
-                    IconUrl = pr.User?.AvatarUrl
-                },
-                Description = pr.Body ?? string.Empty
-            };
-            return embed.Build();
+                    Name = "Milestone",
+                    Value = Formatting.UrlString(issue.Milestone.Title, issue.Milestone.HtmlUrl),
+                    IsInline = true
+                };
+            }
+
+            if (issue.Labels.Any())
+            {
+                yield return new EmbedFieldBuilder
+                {
+                    Name = "Labels",
+                    Value = string.Join(", ", issue.Labels.Select(l => Formatting.CodeString(l.Name))),
+                    IsInline = true
+                };
+            }
         }
     }
 }

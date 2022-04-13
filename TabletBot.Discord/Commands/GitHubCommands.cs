@@ -67,8 +67,8 @@ namespace TabletBot.Discord.Commands
         public async Task GetPullRequest([Remainder] int id)
         {
             var message = await ReplyAsync($"Fetching pull request #{id}");
-            var pr = await _gitHubClient.PullRequest.Get(REPOSITORY_OWNER, REPOSITORY_NAME, id);
-            var embed = GitHubEmbeds.GetPullRequestEmbed(pr);
+            var pr = await _gitHubClient.Issue.Get(REPOSITORY_OWNER, REPOSITORY_NAME, id);
+            var embed = GitHubEmbeds.GetEmbed(pr);
             await message.Update(embed);
         }
 
@@ -77,7 +77,7 @@ namespace TabletBot.Discord.Commands
         {
             var message = await ReplyAsync($"Fetching issue #{id}");
             var issue = await _gitHubClient.Issue.Get(REPOSITORY_OWNER, REPOSITORY_NAME, id);
-            var embed = GitHubEmbeds.GetIssueEmbed(issue);
+            var embed = GitHubEmbeds.GetEmbed(issue);
             await message.Update(embed);
         }
 
