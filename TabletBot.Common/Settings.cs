@@ -22,7 +22,7 @@ namespace TabletBot.Common
         public ulong MutedRoleID { set; get; } = MUTED_ROLE_ID;
         public string CommandPrefix { set; get; } = "!";
         public uint GitHubIssueRefLimit { set; get; } = 3;
-        public uint SpamThreshold { set; get; } = 3;
+        public uint SpamThreshold { set; get; } = 2;
 
         public LogLevel LogLevel { set; get; } = LogLevel.Debug;
 
