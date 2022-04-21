@@ -8,7 +8,7 @@ using TabletBot.Common.Attributes.Bot;
 
 namespace TabletBot
 {
-    partial class Program
+    internal partial class Program
     {
         [Command]
         public static void Help(params string[] args)
@@ -39,11 +39,21 @@ namespace TabletBot
         }
 
         [Command]
-        public static async void ListSettings(params string[] args)
+        public static void ListSettings(params string[] args)
         {
-            using (var box = new Box("Settings"))
+            using (var box = new Box("Settings - " + Settings.File.FullName))
             {
-                var output = await Settings!.ExportAsync();
+                var output = Settings.ToString();
+                box.WriteLine(output);
+            }
+        }
+
+        [Command]
+        public static void ListState(params string[] args)
+        {
+            using (var box = new Box("State - " + State.File.FullName))
+            {
+                var output = State.ToString();
                 box.WriteLine(output);
             }
         }
@@ -78,10 +88,27 @@ namespace TabletBot
         }
 
         [Command]
-        public static async void SaveSettings(params string[] args)
+        public static void SaveSettings(params string[] args)
         {
-            await Settings!.Write(Platform.SettingsFile);
-            Log.Write("Settings", $"Saved to '{Platform.SettingsFile.FullName}'.");
+            try
+            {
+                if (Settings!.Mutable)
+                {
+                    Settings.Write();
+                    Log.Write("Settings", $"Saved settings to '{Settings.File.FullName}'.");
+                }
+                else
+                {
+                    Log.Write("Settings", $"Settings were not saved to '{Settings.File.FullName}' as the file is immutable.", LogLevel.Error);
+                }
+
+                State!.Write();;
+                Log.Write("Settings", $"Saved state to '{State.File.FullName}'.");
+            }
+            catch (Exception e)
+            {
+                Log.Exception(e);
+            }
         }
     }
 }

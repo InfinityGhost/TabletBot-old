@@ -13,15 +13,11 @@ namespace TabletBot.Discord
     {
         public Bot(
             DiscordSocketClient discordSocketClient,
-            IEnumerable<IMessageWatcher> messageWatchers,
-            IEnumerable<IReactionWatcher> reactionWatchers,
-            IEnumerable<IInteractionWatcher> interactionWatchers
+            IEnumerable<IWatcher> watchers
         )
         {
             _discordSocketClient = discordSocketClient;
-            _messageWatchers = messageWatchers;
-            _reactionWatchers = reactionWatchers;
-            _interactionWatchers = interactionWatchers;
+            _watchers = watchers;
 
             _discordSocketClient.Log += LogExtensions.WriteAsync;
             _discordSocketClient.MessageReceived += MessageReceived;
@@ -30,24 +26,15 @@ namespace TabletBot.Discord
 
         private bool _registered;
         private readonly DiscordSocketClient _discordSocketClient;
-        private readonly IEnumerable<IMessageWatcher> _messageWatchers;
-        private readonly IEnumerable<IReactionWatcher> _reactionWatchers;
-        private readonly IEnumerable<IInteractionWatcher> _interactionWatchers;
+        private readonly IEnumerable<IWatcher> _watchers;
 
         public bool IsRunning { set; get; }
 
         public async Task Login(string token)
         {
-            if (token != null)
-            {
-                await _discordSocketClient.LoginAsync(TokenType.Bot, token);
-                await _discordSocketClient.StartAsync();
-                IsRunning = true;
-            }
-            else
-            {
-                throw new NullReferenceException();
-            }
+            await _discordSocketClient.LoginAsync(TokenType.Bot, token);
+            await _discordSocketClient.StartAsync();
+            IsRunning = true;
         }
 
         public async Task Logout()
@@ -67,16 +54,7 @@ namespace TabletBot.Discord
 
         private async Task Ready()
         {
-            if (_registered)
-                return;
-
-            await Task.WhenAll(
-                RegisterWatchers(_messageWatchers, _discordSocketClient),
-                RegisterWatchers(_reactionWatchers, _discordSocketClient),
-                RegisterWatchers(_interactionWatchers, _discordSocketClient)
-            );
-
-            _registered = true;
+            await RegisterWatchers().ConfigureAwait(false);
         }
 
         private async Task MessageReceived(IMessage message)
@@ -85,9 +63,14 @@ namespace TabletBot.Discord
                 await LogExtensions.WriteAsync(message).ConfigureAwait(false);
         }
 
-        private async Task RegisterWatchers(IEnumerable<IWatcher> watchers, DiscordSocketClient discordClient)
+        private async Task RegisterWatchers()
         {
-            await Task.WhenAll(watchers.Select(w => RegisterWatcher(w, discordClient)));
+            if (_registered)
+                return;
+
+            await Task.WhenAll(_watchers.Select(w => RegisterWatcher(w, _discordSocketClient)));
+
+            _registered = true;
         }
 
         private static async Task RegisterWatcher(IWatcher watcher, DiscordSocketClient discordClient)

@@ -179,7 +179,7 @@ namespace TabletBot.Discord.SlashCommands
             var user = command.GetValue<IGuildUser>("user");
             var reason = command.GetValue<string>("reason");
             
-            if (user is IGuildUser)
+            if (user != null)
             {
                 await user.KickAsync(reason);
                 if (reason != null)

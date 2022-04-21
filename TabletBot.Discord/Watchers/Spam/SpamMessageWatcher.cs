@@ -29,13 +29,14 @@ namespace TabletBot.Discord.Watchers.Spam
             if (spamMessageList.Check(message))
             {
                 var guildUser = message.Author as IGuildUser;
-                var guild = _discordClient.Guilds.First(g => g.Id == _settings.GuildID);
+                var guild = guildUser!.Guild;
+
                 var mutedRole = guild.GetRole(_settings.MutedRoleID);
-                await guildUser!.AddRoleAsync(mutedRole);
+                await guildUser.AddRoleAsync(mutedRole);
                 await Task.WhenAll(spamMessageList.Select(m => m.DeleteAsync()));
 
                 var logMessage = $"User {message.Author.Username}#{message.Author.Discriminator} ({message.Author.Id}) was muted for spamming.";
-                var logChannel = guild.GetTextChannel(_settings.LogMessageChannelID);
+                var logChannel = await guild.GetTextChannelAsync(_settings.LogMessageChannelID);
                 await logChannel.SendMessageAsync(logMessage);
                 Log.Write("SpamDetect", logMessage);
             }

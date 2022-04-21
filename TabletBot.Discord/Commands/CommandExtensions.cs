@@ -44,7 +44,7 @@ namespace TabletBot.Discord.Commands
         {
             var field = new EmbedFieldBuilder
             {
-                Name = string.Format("__{0}__", command.Name)
+                Name = $"__{command.Name}__"
             };
 
             if (command.Summary != null)
@@ -54,10 +54,7 @@ namespace TabletBot.Discord.Commands
                 from parameter in command.Parameters
                 select string.Format((parameter.IsOptional ? "[{0}]" : "<{0}>"), parameter.Name);
 
-            field.Value += string.Format("**Syntax**: `{0}{1}{2}`",
-                settings.CommandPrefix,
-                command.Aliases[0],
-                (' ' + string.Join(" ", parameters)).TrimEnd());
+            field.Value += $"**Syntax**: `{settings.CommandPrefix}{command.Aliases[0]}{(' ' + string.Join(" ", parameters)).TrimEnd()}`";
 
             embed.AddField(field);
         }

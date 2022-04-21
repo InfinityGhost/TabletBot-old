@@ -1,16 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Discord;
-using TabletBot.Common;
 using TabletBot.Common.Store;
 
 namespace TabletBot.Discord.Embeds
 {
     public static class SnippetEmbeds
     {
-        public static bool GetSnippetEmbed(Settings settings, string? prefix, out EmbedBuilder embed)
+        public static bool GetSnippetEmbed(this IEnumerable<Snippet> snippets, string? prefix, out EmbedBuilder embed)
         {
-            if (settings.Snippets.FirstOrDefault(s => s.Snippet == prefix!) is SnippetStore snippet)
+            if (snippets.FirstOrDefault(s => s.ID == prefix!) is Snippet snippet)
             {
                 embed = new EmbedBuilder
                 {

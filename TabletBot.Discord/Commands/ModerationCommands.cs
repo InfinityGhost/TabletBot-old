@@ -31,11 +31,11 @@ namespace TabletBot.Discord.Commands
         }
 
         [Command("save", RunMode = RunMode.Async), Name("Force Save"), RequireOwner]
-        public async Task ForceSaveSettings()
+        public async Task SaveSettings()
         {
-            await _settings.Write(Platform.SettingsFile);
-            await ReplyAsync("Settings force saved.", allowedMentions: AllowedMentions.None);
-            Log.Write("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {Platform.SettingsFile.FullName}");
+            _settings.Write();
+            await ReplyAsync("Settings saved.", allowedMentions: AllowedMentions.None);
+            Log.Write("Settings", $"{Context.Message.Author.Username} force-saved the configuration to {AppData.SettingsFile.FullName}");
         }
 
         [Command("kill-bot", RunMode = RunMode.Async), Name("Kill Bot"), RequireOwner]

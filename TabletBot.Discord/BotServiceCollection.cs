@@ -5,7 +5,6 @@ using Octokit;
 using TabletBot.Common;
 using TabletBot.Discord.Commands;
 using TabletBot.Discord.SlashCommands;
-using TabletBot.Discord.Watchers;
 using TabletBot.Discord.Watchers.Commands;
 using TabletBot.Discord.Watchers.DirectMessage;
 using TabletBot.Discord.Watchers.GitHub;
@@ -20,24 +19,25 @@ namespace TabletBot.Discord
         {
         }
 
-        public static IServiceCollection Build(Settings settings, DiscordSocketClient discordClient, GitHubClient gitHubClient)
+        public static IServiceCollection Build(Settings settings, State state, DiscordSocketClient discordClient, GitHubClient gitHubClient)
         {
             return new BotServiceCollection()
                 // Core services
                 .AddSingleton(settings)
+                .AddSingleton(state)
                 .AddSingleton(discordClient)
                 .AddSingleton(gitHubClient)
                 .AddSingleton<Bot>()
                 .AddSingleton<CommandService>()
                 // Message watchers
-                .AddMessageWatcher<CommandMessageWatcher>()
-                .AddMessageWatcher<IssueMessageWatcher>()
-                .AddMessageWatcher<SpamMessageWatcher>()
-                .AddMessageWatcher<ModMailMessageWatcher>()
+                .AddWatcher<CommandMessageWatcher>()
+                .AddWatcher<IssueMessageWatcher>()
+                .AddWatcher<SpamMessageWatcher>()
+                .AddWatcher<ModMailMessageWatcher>()
                 // Reaction watchers
-                .AddReactionWatcher<RoleReactionWatcher>()
+                .AddWatcher<RoleReactionWatcher>()
                 // Interaction watchers
-                .AddInteractionWatcher<SlashCommandInteractionWatcher>()
+                .AddWatcher<SlashCommandInteractionWatcher>()
                 // Commands
                 .AddCommandModule<ModerationCommands>()
                 .AddCommandModule<GitHubCommands>()

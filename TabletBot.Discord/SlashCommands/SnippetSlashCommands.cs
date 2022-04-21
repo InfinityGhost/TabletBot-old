@@ -13,11 +13,11 @@ namespace TabletBot.Discord.SlashCommands
 {
     public sealed class SnippetSlashCommands : SlashCommandModule
     {
-        private readonly Settings _settings;
+        private readonly State _state;
 
-        public SnippetSlashCommands(Settings settings)
+        public SnippetSlashCommands(State state)
         {
-            _settings = settings;
+            _state = state;
         }
 
         private const string SHOW_SNIPPET = "snippet";
@@ -25,11 +25,11 @@ namespace TabletBot.Discord.SlashCommands
         private const string REMOVE_SNIPPET = "remove-snippet";
         private const string EXPORT_SNIPPET = "export-snippet";
 
-        private IList<SnippetStore> Snippets => _settings.Snippets;
+        private IList<Snippet> Snippets => _state.Snippets;
 
         protected override IEnumerable<SlashCommand> GetSlashCommands()
         {
-            var snippets = GetSnippets();
+            var options = CommandOptions();
 
             yield return new SlashCommand
             {
@@ -47,7 +47,7 @@ namespace TabletBot.Discord.SlashCommands
                             Description = "The name of the snippet to show",
                             Type = ApplicationCommandOptionType.String,
                             IsRequired = true,
-                            Choices = snippets
+                            Choices = options
                         }
                     }
                 }
@@ -110,7 +110,7 @@ namespace TabletBot.Discord.SlashCommands
                             Description = "The name of the snippet to remove",
                             Type = ApplicationCommandOptionType.String,
                             IsRequired = true,
-                            Choices = snippets
+                            Choices = options
                         }
                     }
                 }
@@ -132,7 +132,7 @@ namespace TabletBot.Discord.SlashCommands
                             Description = "The name of the snippet to export",
                             Type = ApplicationCommandOptionType.String,
                             IsRequired = true,
-                            Choices = snippets
+                            Choices = options
                         }
                     }
                 }
@@ -143,7 +143,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
 
-            if (SnippetEmbeds.GetSnippetEmbed(_settings, snippet, out var embed))
+            if (Snippets.GetSnippetEmbed(snippet, out var embed))
                 await command.FollowupAsync(embed: embed.Build(), ephemeral: false);
             else
                 await command.FollowupAsync("Could not find snippet");
@@ -155,20 +155,20 @@ namespace TabletBot.Discord.SlashCommands
             var title = command.GetValue<string>("title");
             var content = command.GetValue<string>("content")?.Replace(@"\n", Environment.NewLine);
 
-            if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
+            if (Snippets.FirstOrDefault(s => s.ID == snippet) is Snippet store)
             {
                 // Update the existing snippet
-                store.Title = title;
-                store.Content = content;
+                store.Title = title!;
+                store.Content = content!;
             }
             else
             {
                 // Add a new snippet
-                store = new SnippetStore(snippet, title, content);
+                store = new Snippet(snippet!, title!, content!);
                 Snippets.Add(store);
             }
 
-            await _settings.Overwrite();
+            _state.Write();
             OnUpdate();
             await command.FollowupAsync(embed: new EmbedBuilder
             {
@@ -182,7 +182,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
 
-            if (Snippets.FirstOrDefault(t => t.Snippet == snippet) is SnippetStore store)
+            if (Snippets.FirstOrDefault(t => t.ID == snippet) is Snippet store)
             {
                 Snippets.Remove(store);
                 var embed = new EmbedBuilder
@@ -198,7 +198,7 @@ namespace TabletBot.Discord.SlashCommands
                         }
                     }
                 };
-                await _settings.Overwrite();
+                _state.Write();
                 OnUpdate();
                 await command.FollowupAsync(embed: embed.Build());
             }
@@ -212,7 +212,7 @@ namespace TabletBot.Discord.SlashCommands
         {
             var snippet = command.GetValue<string>("snippet");
 
-            if (Snippets.FirstOrDefault(s => s.Snippet == snippet) is SnippetStore store)
+            if (Snippets.FirstOrDefault(s => s.ID == snippet) is Snippet store)
             {
                 var sb = new StringBuilder();
                 sb.AppendLine(Formatting.CodeString(store.Title));
@@ -222,23 +222,28 @@ namespace TabletBot.Discord.SlashCommands
             }
         }
 
-        private List<ApplicationCommandOptionChoiceProperties> GetSnippets()
+        private List<ApplicationCommandOptionChoiceProperties> CommandOptions()
         {
-            if (!_settings.Snippets?.Any() ?? false)
+            if (!Snippets.Any())
             {
                 return new List<ApplicationCommandOptionChoiceProperties>();
             }
 
-            var query = from snippet in _settings.Snippets
-                let option = new ApplicationCommandOptionChoiceProperties
-                {
-                    Name = $"{snippet.Snippet}: {snippet.Title}",
-                    Value = snippet.Snippet
-                }
+            var query = from snippet in Snippets
+                let option = GetCommandOption(snippet)
                 orderby option.Name
                 select option;
 
             return query.ToList();
+        }
+
+        private static ApplicationCommandOptionChoiceProperties GetCommandOption(Snippet snippet)
+        {
+            return new ApplicationCommandOptionChoiceProperties
+            {
+                Name = $"{snippet.ID}: {snippet.Title}",
+                Value = snippet.ID
+            };
         }
     }
 }

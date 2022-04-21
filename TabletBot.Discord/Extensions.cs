@@ -4,27 +4,16 @@ using System.Linq;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using TabletBot.Discord.SlashCommands;
+using TabletBot.Discord.Watchers;
 
-namespace TabletBot.Discord.Watchers
+namespace TabletBot.Discord
 {
     public static class Extensions
     {
-        public static IServiceCollection AddMessageWatcher<T>(this IServiceCollection serviceCollection)
-            where T : class, IMessageWatcher
+        public static IServiceCollection AddWatcher<T>(this IServiceCollection serviceCollection)
+            where T : class, IWatcher
         {
-            return serviceCollection.AddSingleton<IMessageWatcher, T>();
-        }
-
-        public static IServiceCollection AddReactionWatcher<T>(this IServiceCollection serviceCollection)
-            where T : class, IReactionWatcher
-        {
-            return serviceCollection.AddSingleton<IReactionWatcher, T>();
-        }
-
-        public static IServiceCollection AddInteractionWatcher<T>(this IServiceCollection serviceCollection)
-            where T : class, IInteractionWatcher
-        {
-            return serviceCollection.AddSingleton<IInteractionWatcher, T>();
+            return serviceCollection.AddSingleton<IWatcher, T>();
         }
 
         public static IServiceCollection AddCommandModule<T>(this IServiceCollection serviceCollection)
