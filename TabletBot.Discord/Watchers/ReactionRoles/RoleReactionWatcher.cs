@@ -11,12 +11,12 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
 {
     public class RoleReactionWatcher : IReactionWatcher, IMessageWatcher
     {
-        private readonly Settings _settings;
+        private readonly State _state;
         private readonly DiscordSocketClient _discordSocketClient;
 
-        public RoleReactionWatcher(Settings settings, DiscordSocketClient discordSocketClient)
+        public RoleReactionWatcher(State state, DiscordSocketClient discordSocketClient)
         {
-            _settings = settings;
+            _state = state;
             _discordSocketClient = discordSocketClient;
         }
 
@@ -36,7 +36,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
         {
             try
             {
-                if (GetTrackedRole(reaction, _discordSocketClient) is RoleManagementMessageStore reactionRole)
+                if (GetTrackedRole(reaction, _discordSocketClient) is RoleManagementMessage reactionRole)
                 {
                     var guild = await _discordSocketClient.Rest.GetGuildAsync(channel.GuildId);
                     var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole!.RoleId);
@@ -56,7 +56,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
         {
             try
             {
-                if (GetTrackedRole(reaction, _discordSocketClient) is RoleManagementMessageStore reactionRole)
+                if (GetTrackedRole(reaction, _discordSocketClient) is RoleManagementMessage reactionRole)
                 {
                     var guild = await _discordSocketClient.Rest.GetGuildAsync(channel.GuildId);
                     var role = guild.Roles.FirstOrDefault(r => r.Id == reactionRole!.RoleId);
@@ -76,13 +76,13 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
 
         public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel)
         {
-            if (_settings.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessageStore roleStore)
-                _settings.ReactiveRoles.Remove(roleStore);
+            if (_state.ReactiveRoles.FirstOrDefault(m => m.MessageId == message.Id) is RoleManagementMessage roleStore)
+                _state.ReactiveRoles.Remove(roleStore);
 
             return Task.CompletedTask;
         }
 
-        private RoleManagementMessageStore? GetTrackedRole(
+        private RoleManagementMessage? GetTrackedRole(
             SocketReaction reaction,
             BaseSocketClient client
         )
@@ -90,7 +90,7 @@ namespace TabletBot.Discord.Watchers.ReactionRoles
             if (reaction.UserId == client.CurrentUser.Id)
                 return default;
 
-            var query = from reactRole in _settings.ReactiveRoles
+            var query = from reactRole in _state.ReactiveRoles
                 where reactRole.MessageId == reaction.MessageId
                 where reactRole.EmoteName == reaction.Emote.ToString()
                 select reactRole;

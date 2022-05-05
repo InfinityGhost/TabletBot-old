@@ -1,12 +1,11 @@
+using JetBrains.Annotations;
+
 namespace TabletBot.Common.Store
 {
-    public class RoleManagementMessageStore
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
+    public class RoleManagementMessage
     { 
-        public RoleManagementMessageStore()
-        {
-        }
-
-        public RoleManagementMessageStore(ulong messageId, ulong targetRole, string emote)
+        public RoleManagementMessage(ulong messageId, ulong targetRole, string emote)
         {
             MessageId = messageId;
             RoleId = targetRole;

@@ -78,15 +78,15 @@ namespace TabletBot.Discord.Watchers.Commands
                     moderatorCommands.Add(guildCommand);
             }
 
-            await ApplyCommandPermissions(_client, moderatorCommands);
+            await ApplyCommandPermissions(moderatorCommands);
             module.Update += UpdateModule;
 
             Log.Write("Setup", $"Registered slash command module '{module.GetType().Name}'.");
         }
 
-        private async Task ApplyCommandPermissions(DiscordSocketClient client, IEnumerable<RestGuildCommand> moderatorCommands)
+        private async Task ApplyCommandPermissions(IEnumerable<RestGuildCommand> moderatorCommands)
         {
-            var guild = client.GetGuild(_settings.GuildID);
+            var guild = _client.GetGuild(_settings.GuildID);
             var modRole = guild.GetRole(_settings.ModeratorRoleID);
 
             if (modRole != null)
@@ -103,7 +103,7 @@ namespace TabletBot.Discord.Watchers.Commands
 
                 if (permDict.Any())
                 {
-                    await client.Rest.BatchEditGuildCommandPermissions(_settings.GuildID, permDict);
+                    await _client.Rest.BatchEditGuildCommandPermissions(_settings.GuildID, permDict);
                 }
             }
         }
@@ -131,7 +131,7 @@ namespace TabletBot.Discord.Watchers.Commands
                 Log.Write("SlashCmd", $"Successfully updated slash command {updateable.handler.Name}.");
             }
 
-            await ApplyCommandPermissions(_client, moderatorCommands);
+            await ApplyCommandPermissions(moderatorCommands);
         }
     }
 }

@@ -1,11 +1,10 @@
 using System;
-using System.Threading.Tasks;
 
 namespace TabletBot.Common
 {
     public static class Log
     {
-        public static event Action<LogMessage> Output;
+        public static event Action<LogMessage>? Output;
 
         public static void Write(string group, string text, LogLevel level = LogLevel.Info)
         {

@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Octokit;
 using TabletBot.Common;
@@ -12,17 +13,18 @@ using TabletBot.Discord;
 
 namespace TabletBot
 {
-    partial class Program
+    internal partial class Program
     {
-        public static Bot? Bot { private set; get; }
-        public static Settings? Settings { private set; get; }
-        public static DiscordSocketClient? DiscordClient { private set; get; }
+        private static Settings Settings { get; } = AppData.Settings;
+        internal static State State { get; } = AppData.State;
+        private static Bot? Bot { set; get; }
+        private static DiscordSocketClient? DiscordClient { set; get; }
 
+        [UsedImplicitly]
         private static async Task Main(string[] args)
         {
             string discordToken = Environment.GetEnvironmentVariable("DISCORD_TOKEN")!;
             string githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")!;
-            Settings = Platform.SettingsFile.Exists ? await Settings.Read(Platform.SettingsFile) : new Settings();
 
             var root = new RootCommand("TabletBot")
             {
@@ -39,7 +41,7 @@ namespace TabletBot
             root.Handler = CommandHandler.Create<bool, LogLevel?>((unit, level) =>
             {
                 Settings.LogLevel = level ?? default;
-                Settings.RunAsUnit = unit;
+                State.RunAsUnit = unit;
             });
 
             if (await root.InvokeAsync(args) != 0)
@@ -51,14 +53,14 @@ namespace TabletBot
                     IO.WriteLogMessage(message);
             };
 
-            if (!Settings.RunAsUnit)
+            if (!State.RunAsUnit)
                 IO.WriteMessageHeader();
 
             var config = new DiscordSocketConfig();
             DiscordClient = new DiscordSocketClient(config);
             var gitHubClient = AuthenticateGitHub(githubToken);
 
-            var serviceCollection = BotServiceCollection.Build(Settings, DiscordClient, gitHubClient!);
+            var serviceCollection = BotServiceCollection.Build(Settings, State, DiscordClient, gitHubClient!);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             Bot = serviceProvider.GetRequiredService<Bot>();
@@ -66,7 +68,7 @@ namespace TabletBot
 
             while (Bot.IsRunning)
             {
-                if (Settings.RunAsUnit)
+                if (State.RunAsUnit)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
@@ -76,6 +78,7 @@ namespace TabletBot
                     InvokeCommand(commandArgs);
                 }
             }
+
             await Bot.Logout();
             Console.WriteLine();
         }

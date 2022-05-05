@@ -35,8 +35,11 @@ namespace TabletBot.Discord.Watchers.Commands
 
         public async Task Receive(IMessage message)
         {
-            if (message.Channel is IGuildChannel && !message.Author.IsBot && message.Content.StartsWith(_settings.CommandPrefix))
+            if (!message.Author.IsBot && message.Channel is IGuildChannel guildChannel)
             {
+                if (!message.Content.StartsWith(_settings.CommandPrefix))
+                    return;
+
                 try
                 {
                     var context = new CommandContext(_discordClient, message as IUserMessage);

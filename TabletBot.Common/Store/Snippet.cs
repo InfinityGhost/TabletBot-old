@@ -1,14 +1,13 @@
+using JetBrains.Annotations;
+
 namespace TabletBot.Common.Store
 {
-    public class SnippetStore
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
+    public class Snippet
     {
-        public SnippetStore()
+        public Snippet(string id, string title, string content)
         {
-        }
-
-        public SnippetStore(string snippet, string title, string content)
-        {
-            Snippet = snippet;
+            ID = id;
             Title = title;
             Content = content;
         }
@@ -16,7 +15,7 @@ namespace TabletBot.Common.Store
         /// <summary>
         /// The prefix which will retrieve this snippet.
         /// </summary>
-        public string Snippet { set; get; }
+        public string ID { set; get; }
 
         /// <summary>
         /// The title of the snippet.

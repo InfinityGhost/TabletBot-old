@@ -30,7 +30,7 @@ namespace TabletBot
 
         public static string ReadLine()
         {
-            while (Console.ReadKey() is ConsoleKeyInfo keyInfo)
+            while (Console.ReadKey() is var keyInfo)
             {
                 switch (keyInfo.Key)
                 {
@@ -128,7 +128,7 @@ namespace TabletBot
 
         public static void WriteLogMessage(LogMessage message)
         {
-            switch (message, Program.Settings.RunAsUnit)
+            switch (message, Program.State.RunAsUnit)
             {
                 case (ExceptionLogMessage exceptionLogMessage, true):
                 {
@@ -191,7 +191,7 @@ namespace TabletBot
 
         private static void WriteBufferPrefix()
         {
-            if (!Program.Settings.RunAsUnit)
+            if (!Program.State.RunAsUnit)
                 Console.Out.Write(InputBufferText);
         }
 
