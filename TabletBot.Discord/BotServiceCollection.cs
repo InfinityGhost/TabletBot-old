@@ -31,6 +31,7 @@ namespace TabletBot.Discord
                 .AddSingleton<CommandService>()
                 // Message watchers
                 .AddWatcher<CommandMessageWatcher>()
+                .AddWatcher<CodeMessageWatcher>()
                 .AddWatcher<IssueMessageWatcher>()
                 .AddWatcher<SpamMessageWatcher>()
                 .AddWatcher<ModMailMessageWatcher>()

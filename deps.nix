@@ -18,7 +18,6 @@
   (fetchNuGet { pname = "Octokit"; version = "0.51.0"; sha256 = "1qmmw3vva026lz70xw68pwv6m18ry53a6z5didy2b4isd5bnrs09"; })
   (fetchNuGet { pname = "System.Collections.Immutable"; version = "5.0.0"; sha256 = "1kvcllagxz2q92g81zkz81djkn2lid25ayjfgjalncyc68i15p0r"; })
   (fetchNuGet { pname = "System.CommandLine"; version = "2.0.0-beta1.21216.1"; sha256 = "10p3i10sh9aarqfzac3bgmv9zabb8m5c2aylf3chwlh71kp9l63l"; })
-  (fetchNuGet { pname = "System.CommandLine.DragonFruit"; version = "0.3.0-alpha.19577.1"; sha256 = "09xv1ii0irr69snc9bjzkdg17ccasc3ib40ydakqqwf50lk5za0x"; })
   (fetchNuGet { pname = "System.CommandLine.Experimental"; version = "0.3.0-alpha.19577.1"; sha256 = "1qrj0pvz5zvw0a12sn8xc9i1bh58dsgkdq8gjinzj10l4aa38g1a"; })
   (fetchNuGet { pname = "System.CommandLine.Rendering"; version = "0.3.0-alpha.21216.1"; sha256 = "0kwrjm1i4xc9vgjid1l4wlxddk92fsyypjzg36zs8qxcw07kh9mw"; })
   (fetchNuGet { pname = "System.Interactive.Async"; version = "5.0.0"; sha256 = "00flf80ahpyhrsny2kfl9bsyh1mxmsdsigpq3rzhaps9wgdbmzjz"; })

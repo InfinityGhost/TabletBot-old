@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Discord;
 
 namespace TabletBot.Discord
@@ -18,5 +19,13 @@ namespace TabletBot.Discord
         public static string CodeString(string text) => $"{CODE_AFFIX}{text}{CODE_AFFIX}";
         public static string CodeBlock(string text, string? lang = null) =>
             $"{CODE_BLOCK}{lang}{Environment.NewLine}{text}{Environment.NewLine}{CODE_BLOCK}";
+
+        public static void AppendCodeBlock(this StringBuilder stringBuilder, string[] lines, string? lang = null)
+        {
+            stringBuilder.AppendLine(CODE_BLOCK + lang);
+            foreach (var line in lines)
+                stringBuilder.AppendLine(line);
+            stringBuilder.AppendLine(CODE_BLOCK);
+        }
     }
 }
