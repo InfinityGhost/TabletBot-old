@@ -28,14 +28,8 @@ namespace TabletBot
 
             var root = new RootCommand("TabletBot")
             {
-                new Option<bool>("--unit", "Runs the bot as a unit." )
-                {
-                    Argument = new Argument<bool>("unit")
-                },
+                new Option<bool>("--unit", "Runs the bot as a unit." ),
                 new Option<LogLevel?>("--level", "Limits logging to a specific minimum log level.")
-                {
-                    Argument = new Argument<LogLevel?>("level")
-                }
             };
 
             root.Handler = CommandHandler.Create<bool, LogLevel?>((unit, level) =>
