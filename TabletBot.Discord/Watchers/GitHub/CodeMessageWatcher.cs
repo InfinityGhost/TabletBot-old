@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -49,7 +50,9 @@ namespace TabletBot.Discord.Watchers.GitHub
                     sb.AppendLine(Formatting.CodeString(path));
                     sb.AppendCodeBlock(lines, extension);
 
-                    await message.Channel.SendMessageAsync(sb.ToString(), messageReference: userMessage.ToReference());
+                    var text = sb.ToString();
+                    if (text.Length <= 2000)
+                        await message.Channel.SendMessageAsync(text, messageReference: userMessage.ToReference());
                 }
             }
         }
