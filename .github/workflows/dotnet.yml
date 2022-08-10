@@ -14,11 +14,11 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
       - name: Publish
         env:
           runtime: linux-x64
-          framework: net5.0
+          framework: net6.0
           options: --configuration Release -p:DebugType=embedded --self-contained false
         run: |
           dotnet publish TabletBot $options --runtime $runtime --framework $framework -o bin/$runtime
