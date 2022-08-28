@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Discord;
 using Octokit;
@@ -15,7 +16,7 @@ namespace TabletBot.Discord.Embeds
         {
             if (issue == null)
             {
-                return new EmbedBuilder()
+                return new EmbedBuilder
                 {
                     Color = CLOSED_COLOR,
                     Description = "No issue or pull request was found."
@@ -26,7 +27,7 @@ namespace TabletBot.Discord.Embeds
             {
                 Title = $"{issue.Title} #{issue.Number}",
                 Url = issue.HtmlUrl,
-                Description = issue.Body ?? string.Empty,
+                Description = LimitLength(issue.Body, 750),
                 Color = GetColor(issue),
                 Fields = GetFields(issue).ToList(),
                 Author = new EmbedAuthorBuilder
@@ -70,6 +71,14 @@ namespace TabletBot.Discord.Embeds
                     IsInline = true
                 };
             }
+        }
+
+        private static string LimitLength(string? str, int characterLimit)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return string.Empty;
+
+            return str.Length > characterLimit ? str[..(characterLimit-3)] + "..." : str;
         }
     }
 }
