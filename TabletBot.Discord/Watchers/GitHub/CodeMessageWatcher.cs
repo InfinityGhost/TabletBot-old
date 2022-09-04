@@ -20,7 +20,7 @@ namespace TabletBot.Discord.Watchers.GitHub
         }
 
         private static readonly Regex CodeRefRegex = new Regex(
-            @"https:\/\/github.com\/(?<Owner>.+?)\/(?<Repo>.+?)\/blob\/(?<GitRef>.+?)\/(?<Path>.+?)#L(?<StartLine>.+?)(?:-L(?<EndLine>.+?))?($| |>)",
+            @"https:\/\/github.com\/(?<Owner>.+?)\/(?<Repo>.+?)\/blob\/(?<GitRef>.+?)\/(?<Path>.+?)(\?.+?)?#L(?<StartLine>.+?)(?:-L(?<EndLine>.+?))?($| |>)",
             RegexOptions.Compiled
         );
 
