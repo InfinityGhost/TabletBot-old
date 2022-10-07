@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using Discord;
 using Octokit;
 using TabletBot.Discord.Commands;
+using TabletBot.Discord.Watchers.Safe;
 
 namespace TabletBot.Discord.Watchers.GitHub
 {
-    public class CodeMessageWatcher : IMessageWatcher
+    public class CodeMessageWatcher : SafeMessageWatcher
     {
         private readonly GitHubClient _client;
 
@@ -24,7 +25,7 @@ namespace TabletBot.Discord.Watchers.GitHub
             RegexOptions.Compiled
         );
 
-        public async Task Receive(IMessage message)
+        protected override async Task ReceiveInternal(IMessage message)
         {
             var match = CodeRefRegex.Match(message.Content);
             if (message is IUserMessage userMessage && match.Success)
@@ -56,8 +57,5 @@ namespace TabletBot.Discord.Watchers.GitHub
                 }
             }
         }
-
-        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) =>
-            Task.CompletedTask;
     }
 }

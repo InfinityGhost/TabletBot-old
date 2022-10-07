@@ -2,25 +2,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using Discord.WebSocket;
 using TabletBot.Common;
-
-#nullable enable
+using TabletBot.Discord.Watchers.Safe;
 
 namespace TabletBot.Discord.Watchers.Spam
 {
-    public class SpamMessageWatcher : IMessageWatcher
+    public class SpamMessageWatcher : SafeMessageWatcher
     {
         private readonly Settings _settings;
-        private readonly DiscordSocketClient _discordClient;
 
-        public SpamMessageWatcher(Settings settings, DiscordSocketClient discordClient)
+        public SpamMessageWatcher(Settings settings)
         {
             _settings = settings;
-            _discordClient = discordClient;
         }
 
-        public async Task Receive(IMessage message)
+        protected override async Task ReceiveInternal(IMessage message)
         {
             if(!_spamMessageLists.ContainsKey(message.Author.Id))
                 _spamMessageLists.Add(message.Author.Id, new SpamMessageList(_settings.SpamThreshold));
@@ -41,8 +37,6 @@ namespace TabletBot.Discord.Watchers.Spam
                 Log.Write("SpamDetect", logMessage);
             }
         }
-
-        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
 
         private readonly IDictionary<ulong, SpamMessageList> _spamMessageLists = new Dictionary<ulong, SpamMessageList>();
     }

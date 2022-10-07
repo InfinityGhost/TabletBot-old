@@ -6,10 +6,11 @@ using Discord;
 using Discord.WebSocket;
 using TabletBot.Common;
 using TabletBot.Discord.Commands;
+using TabletBot.Discord.Watchers.Safe;
 
 namespace TabletBot.Discord.Watchers.DirectMessage
 {
-    public class ModMailMessageWatcher : IMessageWatcher
+    public class ModMailMessageWatcher : SafeMessageWatcher
     {
         private readonly DiscordSocketClient _client;
         private readonly Settings _settings;
@@ -22,7 +23,7 @@ namespace TabletBot.Discord.Watchers.DirectMessage
 
         private ITextChannel? _directMessageLogChannel;
 
-        public async Task Receive(IMessage message)
+        protected override async Task ReceiveInternal(IMessage message)
         {
             if (message.Channel is IDMChannel dmChannel)
             {
@@ -77,7 +78,5 @@ namespace TabletBot.Discord.Watchers.DirectMessage
                 Value = Formatting.UrlString(attachment)
             };
         }
-
-        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
     }
 }

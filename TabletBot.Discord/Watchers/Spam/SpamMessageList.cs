@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Discord;
 
-#nullable enable
-
 namespace TabletBot.Discord.Watchers.Spam
 {
     public class SpamMessageList : List<IMessage>

@@ -7,12 +7,11 @@ using Octokit;
 using TabletBot.Common;
 using TabletBot.Discord.Embeds;
 using TabletBot.Discord.Commands;
-
-#nullable enable
+using TabletBot.Discord.Watchers.Safe;
 
 namespace TabletBot.Discord.Watchers.GitHub
 {
-    public class IssueMessageWatcher : IMessageWatcher
+    public class IssueMessageWatcher : SafeMessageWatcher
     {
         private readonly Settings _settings;
         private readonly GitHubClient _gitHubClient;
@@ -28,7 +27,7 @@ namespace TabletBot.Discord.Watchers.GitHub
 
         private static readonly Regex IssueRefRegex = new Regex(@" ?#([0-9]+[0-9]) ?");
 
-        public async Task Receive(IMessage message)
+        protected override async Task ReceiveInternal(IMessage message)
         {
             if (message.Author.IsBot || message is not IUserMessage userMessage)
                 return;
@@ -45,8 +44,6 @@ namespace TabletBot.Discord.Watchers.GitHub
                 }
             }
         }
-
-        public Task Deleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel) => Task.CompletedTask;
 
         private async Task ReplyWithEmbeds(IUserMessage message, IList<uint> refs)
         {
