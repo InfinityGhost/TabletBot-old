@@ -1,10 +1,8 @@
 { pkgs ? import <nixpkgs> { } }:
 
 let
-  tabletbot = pkgs.callPackage ./default.nix {};
+  defaultPackage = pkgs.callPackage ./default.nix {};
 in pkgs.mkShell {
-  buildInputs = with pkgs; [
-    tabletbot
-  ];
+  buildInputs = with pkgs; [ defaultPackage.dotnet-sdk ];
   hardeningDisable = [ "all" ];
 }
